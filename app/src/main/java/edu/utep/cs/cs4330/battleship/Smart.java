@@ -1,7 +1,7 @@
 /*
 * @author Mahdokht Afravi
 * @created 03.05 U
-* @modified 03.05 U
+* @modified 03.19 U
 *
 * Provides the Logic of a Smart Strategy for Battleship.
 */
@@ -9,16 +9,19 @@
 package edu.utep.cs.cs4330.battleship;
 
 public class Smart {
-    private boolean board[][];
+    /* Knowledge of where was already a hit or was a miss */
+    private boolean hit[][];
+    private boolean hadShip[][];
     private int previousX;
     private int previousY;
-    private boolean[] shipSunk;
+    private Ship[] sunk;
 
     public Smart(int size, int ships) {
-        shipSunk = new boolean[ships];
+        sunk = new Ship[ships];
         previousX = -1;
         previousY = -1;
-        board = new boolean[size][size];
+        hit = new boolean[size][size];
+        hadShip = new boolean[size][size];
         clearMemory();
     }
 
@@ -30,21 +33,35 @@ public class Smart {
 
     public void clearShips() {
         /* Clear out the memory of Ships sunk */
-        for ( int i=0 ; i<shipSunk.length ; i++ )
-            shipSunk[i] = false;
+        for ( int i=0 ; i<sunk.length ; i++ )
+            sunk[i] = new Ship(i);
     }
 
     public void clearBoard() {
         /* Clear out the hits marked on the Board */
-        for ( int i=0 ; i<board.length ; i++ )
-            for ( int j=0 ; j<board[i].length ; j++ )
-                board[i][j] = false;
+        for ( int i=0 ; i<hit.length ; i++ )
+            for ( int j=0 ; j<hit[i].length ; j++ ) {
+                hit[i][j] = false;
+                hadShip[i][j] = false;
+            }
     }
 
-    public int[] chooseHit() {
-        /* Finds the X-coordinate to Hit */
-        for ( int i=0 ; i<board.length ; i++ )
-            for ( int j=0 ; j<board[i].length ; j++ )
-                if ( board[i][j] &&
+    public Place chooseHit() {
+        /* Finds the X and Y- coordinates to Hit using a goal-winning Strategy */
+        Place place = new Place();
+        for ( int i=previousX ; i<hit.length ; i++ )
+            for ( int j=previousY ; j<hit[i].length ; j++ ) {
+                if ( hit[i][j] && !hadShip[i][j] ) {
+                    //hit this area but it did not have a ship, so search for new Place
+                }
+                if ( hit[i][j] && hadShip[i][j] ) {
+                    //check if this ship has already been sunk N/S/E/W
+                    //if already sunk, choose another place
+                    //find the nearest place if it has not been sunk
+                }
+                place.setIndex(i, j);
+                return place;
+            }
+        return place;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * @author Mahdokht Afravi
  * @created 03.05 U
- * @modified 03.05 U
+ * @modified 03.18 S
  *
  * Models the Ships in the 2D Battleship board game.
  */
@@ -20,7 +20,7 @@ public class Ship {
         name = chooseName(i);
         length = chooseSize(i);
         if ( name.equalsIgnoreCase("NOT A SHIP") || length<0 )
-            System.out.println("CAN'T MAKE SHIP" + i);
+            System.out.println("CAN'T MAKE SHIP: " + i);
         sunk = false;
     }
 
@@ -90,5 +90,10 @@ public class Ship {
     /* Returns TRUE if the direction is vertical */
     public boolean isVertical() {
         return direction;
+    }
+
+    /* Flips the orientation of the Ship's direction */
+    public void rotate() {
+        direction = !direction;
     }
 }

@@ -1,7 +1,7 @@
 /*
 * @author Mahdokht Afravi
 * @created 03.05 U
-* @modified 03.05 U
+* @modified 03.19 U
 *
 * Controls the behavior of the Battleship Game.
 */
@@ -9,64 +9,83 @@
 package edu.utep.cs.cs4330.battleship;
 
 public class Battleship {
-    /* The Board in the Game */
-    private Board board;
-    /* The Ships in the Game */
-    private final int SHIPS = 5;
-    private Ship[] ship;
+    /* The maximum size of the Board */
+    private final int SIZE;
     /* The Players in the Game */
     private Player player1;
     private Player player2;
-    /* Game's Board size */
-    private int size;
 
     public Battleship(int s) {
-        size = s;
-        createShips();
-        createBoard();
-        createPlayers();
+        SIZE = s;
+        initPlayers();
     }
 
-    private void createShips() {
-        /* Create the Ships for the Battleship Game */
-        ship = new Ship[SHIPS];
-        for ( int i=0 ; i<SHIPS ; i++ )
-            ship[i] = new Ship(i);
-    }
-
-    private void createBoard() {
-        /* Create the Board for the Battleship Game */
-        board = new Board(size);
-    }
-
-    private void createPlayers() {
+    private void initPlayers() {
         /* Create the Players for the Battleship Game */
         player1 = new Player();
+        //The computer player (setting a strategy)
         player2 = new Player();
+        player2.setName("Computer");
     }
 
     public void addSmartStrategy() {
-        /* Add a Smart Strategy to the Computer Player */
+        /* Add a Smart Strategy to the computer Player */
         player2.setStrategy(true);
+        initComputer();
     }
-
     public void addRandomStrategy() {
-        /* Add a Random Strategy to the Computer Player */
+        /* Add a Random Strategy to the computer Player */
         player2.setStrategy(false);
+        initComputer();
     }
 
-    public Board board() {
-        /* Returns this Game's Board */
-        return board;
+    private void initComputer() {
+        /* The computer Player chooses where to place the Ships in the board */
+        player2.placeShips();
     }
 
-    public void setBoard(Board b) {
-        /* Re-establish the Game's Board */
-        board = b;
+    public boolean computerWon() {
+        /* Returns whether the computer Player won the game or not */
+        return player1.lostGame();
     }
 
-    public Ship[] ships() {
-        /* Returns this Game's Ships */
-        return ship;
+    public boolean userWon() {
+        /* Returns whether the user/human Player won the game or not */
+        return player2.lostGame();
+    }
+
+    public boolean isOver() {
+        /* Returns whether there are any more Ships to sink */
+        return ( player1.lostGame() || player2.lostGame() );
+    }
+
+    public Board userBoard() {
+        /* Returns the user's Board */
+        return player1.board();
+    }
+
+    public Board compBoard() {
+        /* Returns the computer's Board */
+        return player2.board();
+    }
+
+    public boolean hit(int x, int y) {
+        /* If it is the user Player's turn to hit, was it a hit or a miss? */
+        if ( player1.canHit() )
+            //if the hit was a miss, end Player1's turn
+            if ( !player2.hit(x,y) ) //hit into Player2's Board
+                switchTurns();
+        if ( player2.canHit() ) {
+            while ( !player2.chooseHit() )
+                ; //until the hit is a miss, then end Player2's turn
+            switchTurns();
+        }
+        return false;
+    }
+
+    public void switchTurns() {
+        /* Switch the Player's turns in the game. */
+        player1.switchTurn();
+        player2.switchTurn();
     }
 }

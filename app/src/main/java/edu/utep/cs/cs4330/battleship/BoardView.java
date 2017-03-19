@@ -115,10 +115,30 @@ public class BoardView extends View {
         drawPlaces(canvas);
     }
 
+    //@created Mahdokht Afravi on 03.18 S
+    /* Paint for hit on a Place with a Ship */
+    private final Paint hitPaint = new Paint(Paint.ANTI_ALIAS_FLAG); {
+        hitPaint.setColor(Color.RED);
+    }
+    /* Paint for hit on a Place without a Ship */
+    private final Paint missPaint = new Paint(Paint.ANTI_ALIAS_FLAG); {
+        missPaint.setColor(Color.WHITE);
+    }
+
+    //@modified Mahdokht Afravi on 03.18 S
     /** Draw all the places of the board. */
     private void drawPlaces(Canvas canvas) {
-        // *** FOR YOU TO COMPLETE ***
         // check the state of each place of the board and draw it.
+        for(int r = 0; r < boardSize; r++) {
+            for(int c = 0; c < boardSize; c++) {
+                float left = c * lineGap();
+                float top = r * lineGap();
+                if(board.at(c, r).isHit() && board.at(c, r).hasShip())
+                    canvas.drawCircle(left+20, top+20, lineGap()/2, hitPaint);
+                else if (board.at(c, r).isHit())
+                    canvas.drawCircle(left+20, top+20, lineGap()/2, missPaint);
+            }
+        }
     }
 
     /** Draw horizontal and vertical lines. */
