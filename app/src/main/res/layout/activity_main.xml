@@ -18,17 +18,54 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/rem5ships"
-            android:layout_marginTop="20dp"
+            android:text="@string/instr"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"/>
 
-        <Button
-            android:text="@string/rotate_ship_label"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/rotateShip"
-            android:onClick="rotateClicked"/>
+            android:orientation="horizontal">
+
+            <Button
+                android:text="1"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:id="@+id/ship1"
+                android:onClick="rotateFirst"/>
+
+            <Button
+                android:text="2"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="35dp"
+                android:id="@+id/ship2"
+                android:onClick="rotateSecond"/>
+
+            <Button
+                android:text="3"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="35dp"
+                android:id="@+id/ship3"
+                android:onClick="rotateThird"/>
+
+            <Button
+                android:text="4"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="35dp"
+                android:id="@+id/ship4"
+                android:onClick="rotateFourth"/>
+
+            <Button
+                android:text="5"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="35dp"
+                android:id="@+id/ship5"
+                android:onClick="rotateFifth"/>
+        </LinearLayout>
 
         <edu.utep.cs.cs4330.battleship.BoardView
             android:id="@+id/boardView"
@@ -37,12 +74,28 @@
             android:layout_height="0dp"
             android:layout_marginTop="5dp"/>
 
-        <Button
-            android:text="@string/create_button_label"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:id="@+id/createButton"
-            android:onClick="createClicked"/>
+            android:orientation="horizontal">
+
+            <Button
+                android:text="@string/smart"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="50dp"
+                android:layout_gravity="right"
+                android:id="@+id/strategyButton"
+                android:onClick="strategyClicked"/>
+
+            <Button
+                android:text="@string/create_button_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="35dp"
+                android:layout_gravity="right"
+                android:id="@+id/createButton"
+                android:onClick="createClicked"/>
+            </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

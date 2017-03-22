@@ -5,14 +5,17 @@
     <string name="create_button_label">Create Game</string>
     <string name="rotate_ship_label">Rotate Ship</string>
 
-    <!-- Ships Remaining for Placement -->
-    <string name="rem5ships">5 Ships remaining to place</string>
-    <string name="rem4ships">4 Ships remaining to place</string>
-    <string name="rem3ships">3 Ships remaining to place</string>
-    <string name="rem2ships">2 Ships remaining to place</string>
-    <string name="rem1ships">1 Ship remaining to place</string>
-    <string name="rem0ships">No Ships remaining to place. Create game to play!</string>
+    <!-- Ships for Placement -->
+    <string name="instr">Place each ship. Click the buttons to rotate each ship.</string>
 
     <!-- The number of shots in the game -->
     <string name="shot0">0 Shots</string>
+
+    <!-- The difficulty to play against -->
+    <string name="smart">High Difficulty</string>
+    <string name="random">Low Difficulty</string>
+
+    <!-- Computer Player's BoardView -->
+    <string name="computer_name">Player: Computer</string>
+    <string name="user_name">Player: User</string>
 </resources>

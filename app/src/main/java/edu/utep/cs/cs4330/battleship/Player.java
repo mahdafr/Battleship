@@ -15,43 +15,39 @@ public class Player {
     /* This Player's name, number of wins, and number of ships placed so far */
     private String name;
     private int wins;
-    private int shipsPlaced;
     /* The computer Player's Strategy */
     private Strategy strategy;
     /* This Player's Board and Ships */
     private Board board;
     private Ship[] ship;
-    /* The number of Ships and the Size of the Board */
-    private final int SHIPS = 5;
-    private final int SIZE = 10;
     /* Track if it is this Player's turn */
     private boolean turn;
-    /* Tracking knowledge of what was hit in the opposing Player's Board */
-    private Board opponent;
+    /* Keeping track of the Ships sunk by and against this Player */
+    private int shipsSunk;
 
-    public Player() {
+    public Player(int board, int ships) {
         wins = 0;
-        shipsPlaced = 0;
-        initShips();
-        initBoard();
+        shipsSunk = 0;
+        initShips(ships);
+        initBoard(board);
         turn = false;
     }
 
-    private void initShips() {
+    private void initShips(int ships) {
         /* Create the Ships for the game */
-        ship = new Ship[SHIPS];
-        for ( int i=0 ; i<SHIPS ; i++ )
+        ship = new Ship[ships];
+        for ( int i=0 ; i<ships ; i++ )
             ship[i] = new Ship(i);
     }
 
-    private void initBoard() {
+    private void initBoard(int b) {
         /* Create the Board for the Battleship Game */
-        board = new Board(SIZE);
+        board = new Board(b);
     }
 
     public void setStrategy(boolean smartPlay) {
         /* Gives a Strategy to this computer Player */
-        strategy = new Strategy(smartPlay);
+        strategy = new Strategy(smartPlay,board.size(),ship.length);
     }
 
     public void setName(String n) {
@@ -66,22 +62,20 @@ public class Player {
 
     public Boolean lostGame() {
         /* This Player lost the game if all of his/her Ships are sunk */
-        for ( int i=0 ; i<SHIPS ; i++ )
+        for ( int i=0 ; i<ship.length ; i++ )
             if ( !ship[i].sunk() )
                 return false;
         return true;
     }
 
-    public Board placeShips() {
+    public void placeShips() {
         /* The strategy for the Player (computer) places the ships. */
-        return strategy.placeShip(ship,board);
+        board = strategy.placeShip(ship,board);
     }
 
-    public Board placeTheShips(Ship s, int x, int y) {
+    public void placeShip(Ship s, int x, int y) {
         /* User chose to place a ship at this index */
-        board.placeShip(s,x,y,s.isVertical());
-        shipsPlaced++;
-        return board;
+        board.placeShip(s, x, y, s.isVertical());
     }
 
     public Board board() {
@@ -89,9 +83,9 @@ public class Player {
         return board;
     }
 
-    public void rotateShip(Ship s, boolean rotate) {
+    public void rotateShip(int i) {
         /* Rotate the direction of the Ship to place */
-        s.rotate();
+        ship[i].rotate();
     }
 
     public boolean canHit() {
@@ -102,7 +96,16 @@ public class Player {
     public boolean hit(int x, int y) {
         /* The opposing Player made a hit on this Player's Board.
          * Returns TRUE if the hit was not a miss. */
-        return board.hit(x,y);
+        if ( board.hit(x,y) ) { //was a ship in this Place of the Board
+            //check if the ship was sunk
+            for ( int i=0 ; i<ship.length ; i++ )
+                if ( board.hasShipSunk(ship[i]) ) {
+                    ship[i].sink();
+                    shipsSunk++;
+                }
+            return true;
+        }
+        return false;
     }
 
     public void switchTurn() {
@@ -113,7 +116,7 @@ public class Player {
     public boolean chooseHit() {
         /* For the computer Player, choose a Place to hit in the Board.
          * Returns TRUE if the hit was not a miss. */
-        return board.hit(strategy.chooseHit(board));
+        return board.hit(strategy.chooseHit());
     }
 
     public boolean hasWon() {
@@ -124,5 +127,35 @@ public class Player {
     public boolean isGameOver() {
         /* Has this Player hit the entire Board? */
         return board.isGameOver();
+    }
+
+    public int numberOfShips() {
+        /* Returns the number of Ships to be placed in the Board */
+        return ship.length;
+    }
+
+    /* When restoring the state of the game */
+    public void setBoard(Board b) {
+        board = b;
+    }
+    public boolean isSmart() {
+        return strategy.isSmart();
+    }
+    
+    public Ship[] ships() {
+    	return ship;
+    }
+
+    /* Moves Ship i to the Place(x,y) */
+    public boolean moveShip(int i, int x, int y) {
+        return board.placeShip(ship[i],x,y,ship[i].isVertical());
+    }
+
+    /* Gets the Ship at index(x,y) */
+    public int getShipAt(int x, int y) {
+        for ( int i=0 ; i<ship.length ; i++ )
+            if ( ship[i].isAt(x,y) )
+                return i;
+        return -1;
     }
 }

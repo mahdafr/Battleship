@@ -51,17 +51,15 @@ public class Smart {
         Place place = new Place();
         for ( int i=previousX ; i<hit.length ; i++ )
             for ( int j=previousY ; j<hit[i].length ; j++ ) {
-                if ( hit[i][j] && !hadShip[i][j] ) {
-                    //hit this area but it did not have a ship, so search for new Place
-                }
                 if ( hit[i][j] && hadShip[i][j] ) {
                     //check if this ship has already been sunk N/S/E/W
                     //if already sunk, choose another place
                     //find the nearest place if it has not been sunk
                 }
-                place.setIndex(i, j);
-                return place;
+                place.setIndex(i,j);
             }
+        previousX = place.getX();
+        previousY = place.getY();
         return place;
     }
 }

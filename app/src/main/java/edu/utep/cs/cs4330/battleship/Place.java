@@ -19,6 +19,12 @@ public class Place {
         hasShip = false;
     }
 
+    public Place(int i, int j) {
+    	hasShip = false;
+        x = i;
+        y = j;
+    }
+
     /* Mutators: establishing index of this place */
     public void setIndex(int i, int j) {
         x = i;
@@ -42,8 +48,9 @@ public class Place {
     }
 
     /* Add a ship to this place */
-    public void addShip() {
+    public Place addShip() {
         hasShip = true;
+        return this;
     }
 
     /* Return whether this Place was hit already */
@@ -54,5 +61,11 @@ public class Place {
     /* Return whether this Place has a Ship or not */
     public boolean hasShip() {
         return hasShip;
+    }
+    
+    /* To save in the Board once hit */
+    public Place markHit() {
+    	isHit = true;
+    	return this;
     }
 }

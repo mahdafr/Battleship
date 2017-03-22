@@ -9,18 +9,21 @@
 package edu.utep.cs.cs4330.battleship;
 
 public class Strategy {
-    java.util.Random random;
+    private java.util.Random random;
     private Smart smart;
     private int boardSize;
     private int ships;
 
-    public Strategy(boolean smartPlay) {
-        boardSize = 10;
-        ships = 5;
-        if ( smartPlay )
-            smart = new Smart(boardSize,ships);
-        else
+    public Strategy(boolean smartPlay, int b, int s) {
+        boardSize = b;
+        ships = s;
+        if ( smartPlay ) {
+            random = null;
+            smart = new Smart(b, s);
+        } else {
+            smart = null;
             random = new java.util.Random();
+        }
     }
 
     public Board placeShip(Ship[] ship, Board board) {
@@ -31,7 +34,7 @@ public class Strategy {
         for ( int i=0 ; i<ship.length ; i++ ) {
             //choose the direction for each Ship
             ship[i].setDirection(r.nextBoolean());
-            //choose the X- and Y- directions for the Ship
+            //choose the X- and Y- positions for the Ship
             int x = r.nextInt(board.size());
             int y = r.nextInt(board.size());
             if ( !board.placeShip(ship[i],x,y,ship[i].isVertical()) )
@@ -40,17 +43,22 @@ public class Strategy {
         return board;
     }
 
-    public Place chooseHit(Board b) {
+    public Place chooseHit() {
         /* Choose a place to hit as a play in the Game */
         int x, y;
         if ( smart==null ) {
             //randomly chooses a hit
             x = random.nextInt(boardSize);
             y = random.nextInt(boardSize);
-            return b.at(x,y);
+            return new Place(x,y);
         } else {
             //smart chooses a hit
             return smart.chooseHit();
         }
+    }
+
+    /* When restoring the state of the game */
+    public boolean isSmart() {
+        return smart==null;
     }
 }

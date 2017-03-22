@@ -15,8 +15,6 @@ package edu.utep.cs.cs4330.battleship;
  * in either a hit or miss.
  */
 public class Board {
-    private Place[][] board; //@modified Mahdokht Afravi on 03.05 U
-
     /**
      * Size of this board. This board has
      * <code>size*size </code> places.
@@ -26,8 +24,7 @@ public class Board {
     /** Create a new board of the given size. */
     public Board(int size) {
         this.size = size;
-        board = new Place[size][size];
-        numHits = 0; //@modified Mahdokht Afravi on 03.05 U
+        init(); //@modified Mahdokht Afravi on 03.05 U
     }
 
     /** Return the size of this board. */
@@ -48,24 +45,46 @@ public class Board {
     //    public int numOfShots()
     //    public boolean isGameOver()
     //    ...?
+
     /*
      * @author Mahdokht Afravi
      * @modified 03.05 U
      */
+    private Place[][] board;
     private int numHits;
+
+    private void init() {
+        board = new Place[size][size];
+        clearBoard();
+        numHits = 0;
+    }
+
+    public void clearBoard() {
+        for ( int i=0 ; i<size ; i++ )
+            for ( int j=0 ; j<size ; j++ )
+                board[i][j] = new Place(i,j);
+    }
 
     public boolean placeShip(Ship s, int x, int y, boolean dir) {
         /* Sets each Place starting from (x,y) to contain a Ship
          * depending on the dir (ship.isVertical()) of the Ship */
+        Place[] p = new Place[s.getLength()];
+        int index = 0;
         if ( dir ) { //vertical placement
             if ( canPlace(s,x,y) ) {
-                for (int i = x; i < x + s.getSize(); i++)
-                    board[i][y].addShip();
+                for (int i = x; i < x + s.getSize(); i++) {
+                    board[i][y] = board[i][y].addShip();
+                    p[index++] = new Place(i,y);
+                }
+                s.setPlaces(p);
             } else return false;
         } else { //horizontal placement
             if ( canPlace(s,x,y) ) {
-                for (int j = y; j < y + s.getSize(); j++)
-                    board[x][j].addShip();
+                for (int j = y; j < y + s.getSize(); j++) {
+                    board[x][j] = board[x][j].addShip();
+                    p[index++] = new Place(x,j);
+                }
+                s.setPlaces(p);
             } else return false;
         }
         return true;
@@ -101,7 +120,9 @@ public class Board {
 
     public boolean hit(int x, int y) {
         /* Mark this index as hit */
-        return board[x][y].hit();
+    	System.out.println("hitting it up");
+    	board[x][y] = board[x][y].markHit();
+    	return board[x][y].hit();
     }
 
     public boolean hit(Place place) {
@@ -109,7 +130,7 @@ public class Board {
         return hit(place.getX(),place.getY());
     }
 
-    public Place at(int x, int y) {
+    private Place at(int x, int y) {
         /* Get the place at this index (X,Y) */
         return board[x][y];
     }
@@ -135,6 +156,24 @@ public class Board {
             for ( int j=0 ; j<size ; j++ )
                 if ( board[i][j].hasShip() && !board[i][j].isHit() )
                     return false;
+        return true; //hasShipSunk();
+    }
+
+    /* Checks if the Ship on this Board has been sunk */
+    public boolean hasShipSunk(Ship s) {
+        if ( s.isVertical() )
+            for ( int i=s.getX() ; i<s.getLength() ; i++ )
+                if ( !board[i][s.getY()].isHit() )
+                    return false;
+        else
+            for ( int j=s.getY() ; i<s.getLength() ; i++ )
+                if ( !board[s.getX()][j].isHit() )
+                    return false;
         return true;
+    }
+
+    /* Only used when adding a Ship to this Place */
+    public void addShip(int x, int y) {
+        board[x][y] = board[x][y].addShip();
     }
 }

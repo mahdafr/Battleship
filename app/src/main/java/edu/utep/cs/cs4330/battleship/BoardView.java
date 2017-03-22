@@ -81,6 +81,8 @@ public class BoardView extends View {
     public void setBoard(Board board) {
         this.board = board;
         this.boardSize = board.size();
+        canShowShips = false; //@created Mahdokht Afravi on 03.05 U
+        invalidate(); //@modified Mahdokht Afravi on 03.05 U
     }
 
     /**
@@ -124,19 +126,36 @@ public class BoardView extends View {
     private final Paint missPaint = new Paint(Paint.ANTI_ALIAS_FLAG); {
         missPaint.setColor(Color.WHITE);
     }
+    /* Paint for Ship on a Place */
+    private final Paint shipPaint = new Paint(Paint.ANTI_ALIAS_FLAG); {
+        shipPaint.setColor(Color.GREEN);
+    }
+    public void setUserBoard(Board b) {
+        board = b;
+        boardSize = board.size();
+        canShowShips = true;
+        invalidate();
+    }
+    private boolean canShowShips;
 
     //@modified Mahdokht Afravi on 03.18 S
     /** Draw all the places of the board. */
     private void drawPlaces(Canvas canvas) {
-        // check the state of each place of the board and draw it.
-        for(int r = 0; r < boardSize; r++) {
-            for(int c = 0; c < boardSize; c++) {
-                float left = c * lineGap();
-                float top = r * lineGap();
-                if(board.at(c, r).isHit() && board.at(c, r).hasShip())
-                    canvas.drawCircle(left+20, top+20, lineGap()/2, hitPaint);
-                else if (board.at(c, r).isHit())
-                    canvas.drawCircle(left+20, top+20, lineGap()/2, missPaint);
+        final int RADIUS = 50;
+        final float HALFLINE = lineGap()/2;
+        for( int i=0 ; i<boardSize ; i++) {
+            for( int j=0 ; j<boardSize ; j++) {
+                float left = j*lineGap() + RADIUS;
+                float top = i*lineGap() + RADIUS;
+                if ( board.isHit(i,j) )
+                    if ( board.hasShip(i,j) )
+                        canvas.drawCircle(left, top, HALFLINE, hitPaint);
+                    else
+                        canvas.drawCircle(left, top, HALFLINE, missPaint);
+                if ( canShowShips ) {
+                    if ( board.hasShip(i,j) )
+                        canvas.drawCircle(left, top, HALFLINE, shipPaint);
+                }
             }
         }
     }
