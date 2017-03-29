@@ -13,8 +13,11 @@ package edu.utep.cs.cs4330.battleship;
 
 public class Player {
     /* This Player's name, number of wins, and number of ships placed so far */
-    private String name;
-    private int wins;
+    @SuppressWarnings("unused")
+	private String name;
+    @SuppressWarnings("unused")
+	private int wins;
+    private int shots;
     /* The computer Player's Strategy */
     private Strategy strategy;
     /* This Player's Board and Ships */
@@ -28,6 +31,7 @@ public class Player {
     public Player(int board, int ships) {
         wins = 0;
         shipsSunk = 0;
+        shots = 0;
         initShips(ships);
         initBoard(board);
         turn = false;
@@ -82,10 +86,24 @@ public class Player {
         /* Get this Player's board */
         return board;
     }
+    public int shots() {
+        /* Get this Player's shots */
+        return shots;
+    }
 
-    public void rotateShip(int i) {
-        /* Rotate the direction of the Ship to place */
+    public boolean rotateShip(int i) {
+        /* Rotate the direction of the Ship */
         ship[i].rotate();
+        //Place[] p = ship[i].inPlaces();
+    	//System.out.println("attempt rotate from " +p[0].getX()+","+p[0].getY());
+        if ( board.canRotate(ship[i]) ) {
+        	//System.out.println("can rotate from " +p[0].getX()+","+p[0].getY());
+        	board.clearBoard();
+        	//board.removeShip(ship[i],p[0].getX(),p[0].getY());
+        	//board.placeShip(ship[i],p[0].getX(),p[0].getY(),ship[i].isVertical());
+        	board.restoreShips(ship);
+        	return true;
+        } else return false;
     }
 
     public boolean canHit() {
@@ -96,16 +114,8 @@ public class Player {
     public boolean hit(int x, int y) {
         /* The opposing Player made a hit on this Player's Board.
          * Returns TRUE if the hit was not a miss. */
-        if ( board.hit(x,y) ) { //was a ship in this Place of the Board
-            //check if the ship was sunk
-            for ( int i=0 ; i<ship.length ; i++ )
-                if ( board.hasShipSunk(ship[i]) ) {
-                    ship[i].sink();
-                    shipsSunk++;
-                }
-            return true;
-        }
-        return false;
+        shots++;
+        return board.hit(x,y);
     }
 
     public void switchTurn() {
@@ -116,12 +126,13 @@ public class Player {
     public boolean chooseHit() {
         /* For the computer Player, choose a Place to hit in the Board.
          * Returns TRUE if the hit was not a miss. */
+        shots++;
         return board.hit(strategy.chooseHit());
     }
 
     public boolean hasWon() {
         /* Has this Player won the game? */
-        return board.shipsSunk();
+        return board.shipsSunk() || shipsSunk==ship.length;
     }
 
     public boolean isGameOver() {
@@ -142,17 +153,33 @@ public class Player {
         return strategy.isSmart();
     }
     
+    /* Returns this Player's Ships */
     public Ship[] ships() {
     	return ship;
     }
 
     /* Moves Ship i to the Place(x,y) */
-    public boolean moveShip(int i, int x, int y) {
-        return board.placeShip(ship[i],x,y,ship[i].isVertical());
+    public boolean moveShip(int i, int changeX, int changeY) {
+    	//int i = getShipAt(fromX,fromY);
+    	int prevX = ship[i].getX();
+    	int prevY = ship[i].getY();
+        int newX = prevX + changeX;
+        int newY = prevY + changeY;
+    	if ( board.placeShip(ship[i],newX,newY,ship[i].isVertical()) ) {
+    		//board.removeShip(ship[i],prevX,prevY);
+            board.clearBoard();
+            board.restoreShips(ship);
+    		return true;
+    	} else {
+    		//board.removeShip(ship[i],newX,newY);
+            board.clearBoard();
+            board.restoreShips(ship);
+    		return false;
+    	}
     }
 
     /* Gets the Ship at index(x,y) */
-    public int getShipAt(int x, int y) {
+    private int getShipAt(int x, int y) {
         for ( int i=0 ; i<ship.length ; i++ )
             if ( ship[i].isAt(x,y) )
                 return i;

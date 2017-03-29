@@ -21,20 +21,32 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <Button
-                android:text="@string/new_button_label"
+            <TextView
+                android:id="@+id/compMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@string/computer_name"/>
+
+            <Button
                 android:id="@+id/newButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="100dp"
+                android:text="@string/new_button_label"
                 android:onClick="newClicked"/>
 
             <TextView
+                android:id="@+id/userMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="65dp"
+                android:text="@string/user_name"/>
+            <TextView
+                android:id="@+id/shots"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/shot0"
-                android:layout_marginTop="15dp"
-                android:layout_marginLeft="150dp"/>
-
+                android:layout_marginLeft="20dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -47,7 +59,7 @@
                 android:id="@+id/compBV"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"/>
 
             <!-- User Player BoardView -->
@@ -55,7 +67,7 @@
                 android:id="@+id/userBV"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"/>
             </LinearLayout>
 
@@ -63,20 +75,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/compMessage"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/computer_name"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/userMessage"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/user_name"/>
             </LinearLayout>
 
     </LinearLayout>

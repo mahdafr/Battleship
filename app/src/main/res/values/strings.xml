@@ -6,7 +6,7 @@
     <string name="rotate_ship_label">Rotate Ship</string>
 
     <!-- Ships for Placement -->
-    <string name="instr">Place each ship. Click the buttons to rotate each ship.</string>
+    <string name="instr">Place each ship. Click the buttons to control each ship.</string>
 
     <!-- The number of shots in the game -->
     <string name="shot0">0 Shots</string>
@@ -18,4 +18,10 @@
     <!-- Computer Player's BoardView -->
     <string name="computer_name">Player: Computer</string>
     <string name="user_name">Player: User</string>
+
+    <!-- Buttons -->
+    <string name="left">-</string>
+    <string name="right">+</string>
+    <string name="up">^</string>
+    <string name="down">v</string>
 </resources>

@@ -47,9 +47,14 @@ public class Place {
         return false;
     }
 
-    /* Add a ship to this place */
+    /* Add a Ship to this Place */
     public Place addShip() {
         hasShip = true;
+        return this;
+    }
+    /* Remove a Ship from this Place */
+    public Place removeShip() {
+        hasShip = false;
         return this;
     }
 

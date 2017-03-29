@@ -12,9 +12,16 @@ public class Battleship {
     /* The Players in the Game */
     private Player player1;
     private Player player2;
+    private static Battleship instance = new Battleship(10,5);
 
-    public Battleship(int b, int s) {
+    private Battleship(int b, int s) {
         initPlayers(b,s);
+    }
+
+    public static Battleship getGame() {
+        if ( instance.equals(null) )
+            instance = new Battleship(10,5);
+        return instance;
     }
 
     private void initPlayers(int b, int s) {
@@ -46,44 +53,37 @@ public class Battleship {
         /* Returns whether the computer Player won the game or not */
         return player1.lostGame();
     }
-
     public boolean userWon() {
         /* Returns whether the user/human Player won the game or not */
         return player2.lostGame();
     }
-
     public boolean isOver() {
         /* Returns whether there are any more Ships to sink */
         return ( player1.lostGame() || player2.lostGame() );
+    }
+
+    public void createNewGame() {
+        initPlayers(10,5);
     }
 
     public Board userBoard() {
         /* Returns the user's Board */
         return player1.board();
     }
-
     public Board computerBoard() {
         /* Returns the computer's Board */
         return player2.board();
     }
 
-    public boolean hit(int x, int y) {
-        /* If it is the user Player's turn to hit, was it a hit or a miss? */
-    	System.out.println("p1 turn: " +player1.canHit());
-        if ( player1.canHit() ) {
-            //if the hit was a miss, end Player1's turn
-            if ( !player2.hit(x,y) ) //hit into Player2's Board
-                switchTurns();
-        } else 
-        if ( player2.canHit() ) {
-            while ( !player2.chooseHit() )
-                ; //until the hit is a miss, then end Player2's turn
-            switchTurns();
-        }
-        return false;
+    public boolean playerTurn() {
+        /* Checks if it is user Player's turn */
+        return player1.canHit();
     }
-
-    public void switchTurns() {
+    public boolean computerTurn() {
+        /* Checks if it is computer Player's turn */
+        return player2.canHit();
+    }
+    private void switchTurns() {
         /* Switch the Player's turns in the game. */
         player1.switchTurn();
         player2.switchTurn();
@@ -102,37 +102,37 @@ public class Battleship {
         return player2.numberOfShips();
     }
 
-    public void rotatePlayer1Ship(int i) {
-        /* Rotates the i'th Ship */
-        player1.rotateShip(i);
+    /* Rotates the i'th Ship */
+    public boolean rotatePlayer1Ship(int i) {
+        return player1.rotateShip(i);
+    }
+    /* If possible, moves the selected Ship to Place(x,y) */
+    public boolean moveShip(int s, int changeX, int changeY) {
+        return player1.moveShip(s,changeX,changeY);
     }
 
-    /* When restoring the state of the game */
-    public void setUserBoard(Board b) {
-        player1.setBoard(b);
-    }
-    public void setComputerBoard(Board b) {
-        player2.setBoard(b);
-    }
-    public boolean isHard() {
-        return player2.isSmart();
-    }
-    
     public Ship[] userShips() {
     	return player1.ships();
     }
-    
-    public boolean player1Hit(int x, int y) {
-    	return player1.board().hit(x,y);
-    }
 
-    /* If possible, moves the selected Ship to Place(x,y) */
-    public boolean moveShipTo(int fromX, int fromY, int toX, int toY) {
-        if ( player1.board().hasShip(toX,toY) )
+    /* If the user Player hit a Ship, they can keep hitting */
+    public boolean player1Hit(int x, int y) {
+    	if ( !player1.hit(x,y) ) {
+            switchTurns();
             return false;
-        int s = player1.getShipAt(fromX,fromY);
-        if ( s>-1 && player1.moveShip(s,toX,toY) )
-            return true;
-        return false;
+        }
+        return true;
+    }
+    /* If the computer Player hit a Ship, they can keep hitting */
+    public boolean player2Hit() {
+        if ( !player2.chooseHit() ) {
+            switchTurns();
+            return false;
+        }
+        return true;
+    }
+    /* Returns the number of shots made by the user Player */
+    public int userShots() {
+        return player1.shots();
     }
 }

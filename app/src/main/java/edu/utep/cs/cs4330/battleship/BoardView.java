@@ -137,11 +137,11 @@ public class BoardView extends View {
         invalidate();
     }
     private boolean canShowShips;
+    private int RADIUS;
 
     //@modified Mahdokht Afravi on 03.18 S
     /** Draw all the places of the board. */
     private void drawPlaces(Canvas canvas) {
-        final int RADIUS = 50;
         final float HALFLINE = lineGap()/2;
         for( int i=0 ; i<boardSize ; i++) {
             for( int j=0 ; j<boardSize ; j++) {
@@ -158,6 +158,12 @@ public class BoardView extends View {
                 }
             }
         }
+    }
+
+    //@author Mahdokht Afravi on 03.18 S
+    /* Sets the radius to fit to screen */
+    public void setRadius(int r) {
+        RADIUS = r;
     }
 
     /** Draw horizontal and vertical lines. */

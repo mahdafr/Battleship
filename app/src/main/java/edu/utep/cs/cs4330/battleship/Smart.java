@@ -12,14 +12,12 @@ public class Smart {
     /* Knowledge of where was already a hit or was a miss */
     private boolean hit[][];
     private boolean hadShip[][];
-    private int previousX;
-    private int previousY;
+    private Place previous;
     private Ship[] sunk;
 
     public Smart(int size, int ships) {
         sunk = new Ship[ships];
-        previousX = -1;
-        previousY = -1;
+        previous = null;
         hit = new boolean[size][size];
         hadShip = new boolean[size][size];
         clearMemory();
@@ -49,8 +47,15 @@ public class Smart {
     public Place chooseHit() {
         /* Finds the X and Y- coordinates to Hit using a goal-winning Strategy */
         Place place = new Place();
-        for ( int i=previousX ; i<hit.length ; i++ )
-            for ( int j=previousY ; j<hit[i].length ; j++ ) {
+        int startX, startY;
+        if ( previous==null ) //randomize the first hit
+            startX = startY = new java.util.Random().nextInt(hit.length);
+        else {
+            startX = previous.getX();
+            startY = previous.getY();
+        }
+        for ( int i=startX ; i<hit.length ; i++ )
+            for ( int j=startY ; j<hit[i].length ; j++ ) {
                 if ( hit[i][j] && hadShip[i][j] ) {
                     //check if this ship has already been sunk N/S/E/W
                     //if already sunk, choose another place
@@ -58,8 +63,6 @@ public class Smart {
                 }
                 place.setIndex(i,j);
             }
-        previousX = place.getX();
-        previousY = place.getY();
-        return place;
+        return previous = new Place(place.getX(),place.getY());
     }
 }

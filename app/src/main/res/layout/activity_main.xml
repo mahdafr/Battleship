@@ -19,56 +19,67 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/instr"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <!-- Moves the Ship up/down -->
             <Button
-                android:text="1"
+                android:background="@drawable/up"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:id="@+id/ship1"
-                android:onClick="rotateFirst"/>
-
+                android:layout_marginLeft="0dp"
+                android:id="@+id/shipUp"
+                android:onClick="moveUp"/>
             <Button
-                android:text="2"
+                android:background="@drawable/down"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginLeft="0dp"
+                android:id="@+id/shipDown"
+                android:onClick="moveDown"/>
+
+            <!-- Move the Ship left/right and Rotate -->
+            <Button
+                android:background="@drawable/rotate"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_marginLeft="35dp"
-                android:id="@+id/ship2"
-                android:onClick="rotateSecond"/>
-
+                android:layout_marginRight="35dp"
+                android:id="@+id/rotateShip"
+                android:onClick="rotateShip"/>
             <Button
-                android:text="3"
+                android:background="@drawable/left"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginLeft="35dp"
-                android:id="@+id/ship3"
-                android:onClick="rotateThird"/>
-
+                android:layout_marginLeft="0dp"
+                android:id="@+id/shipLeft"
+                android:onClick="moveLeft"/>
             <Button
-                android:text="4"
+                android:background="@drawable/right"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginLeft="35dp"
-                android:id="@+id/ship4"
-                android:onClick="rotateFourth"/>
+                android:id="@+id/shipRight"
+                android:onClick="moveRight"/>
 
+            <!-- Save the location of this Ship -->
             <Button
-                android:text="5"
+                android:background="@drawable/save"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginLeft="35dp"
-                android:id="@+id/ship5"
-                android:onClick="rotateFifth"/>
+                android:layout_marginLeft="50dp"
+                android:id="@+id/nextShip"
+                android:onClick="nextShip"/>
         </LinearLayout>
 
+        <!-- BoardView -->
         <edu.utep.cs.cs4330.battleship.BoardView
             android:id="@+id/boardView"
+            android:layout_gravity="center_horizontal"
             android:layout_width="match_parent"
             android:layout_weight="1"
             android:layout_height="0dp"

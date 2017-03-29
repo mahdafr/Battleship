@@ -12,7 +12,8 @@ public class Strategy {
     private java.util.Random random;
     private Smart smart;
     private int boardSize;
-    private int ships;
+    @SuppressWarnings("unused")
+	private int ships;
 
     public Strategy(boolean smartPlay, int b, int s) {
         boardSize = b;

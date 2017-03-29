@@ -14,7 +14,8 @@ package edu.utep.cs.cs4330.battleship;
  * and y is a row index. A place of the board can be shot at, resulting
  * in either a hit or miss.
  */
-public class Board {
+@SuppressWarnings("serial")
+public class Board { //implements Serializable {
     /**
      * Size of this board. This board has
      * <code>size*size </code> places.
@@ -68,22 +69,24 @@ public class Board {
     public boolean placeShip(Ship s, int x, int y, boolean dir) {
         /* Sets each Place starting from (x,y) to contain a Ship
          * depending on the dir (ship.isVertical()) of the Ship */
-        Place[] p = new Place[s.getLength()];
-        int index = 0;
+    	Place[] p = new Place[s.getLength()];
+    	int index = 0;
         if ( dir ) { //vertical placement
             if ( canPlace(s,x,y) ) {
                 for (int i = x; i < x + s.getSize(); i++) {
+                	p[index++] = new Place(i,y);
                     board[i][y] = board[i][y].addShip();
-                    p[index++] = new Place(i,y);
                 }
+                //System.out.println("set places vert!");
                 s.setPlaces(p);
             } else return false;
         } else { //horizontal placement
             if ( canPlace(s,x,y) ) {
                 for (int j = y; j < y + s.getSize(); j++) {
+                	p[index++] = new Place(x,j);
                     board[x][j] = board[x][j].addShip();
-                    p[index++] = new Place(x,j);
                 }
+                //System.out.println("set places hori!");
                 s.setPlaces(p);
             } else return false;
         }
@@ -120,7 +123,7 @@ public class Board {
 
     public boolean hit(int x, int y) {
         /* Mark this index as hit */
-    	System.out.println("hitting it up");
+    	//System.out.println("hitting it up");
     	board[x][y] = board[x][y].markHit();
     	return board[x][y].hit();
     }
@@ -175,5 +178,49 @@ public class Board {
     /* Only used when adding a Ship to this Place */
     public void addShip(int x, int y) {
         board[x][y] = board[x][y].addShip();
+    }
+
+    /* Rotating the Ship requires removing the Ship and adding it to the new Places */
+    public boolean canRotate(Ship s) {
+        int x = s.inPlaces()[0].getX();
+        int y = s.inPlaces()[0].getY();
+        board[x][y] = board[x][y].removeShip(); //for checking to place
+        if ( s.isVertical() && canPlace(s,x,y) ) {
+        	//System.out.println("should be gucci vert");
+            return true;
+        } else if ( !s.isVertical() && canPlace(s,x,y) ) {
+        	//System.out.println("should be gucci hori");
+            return true;
+        }
+        board[x][y] = board[x][y].addShip();
+        return false;
+    }
+    
+    /* Replaces the Ships in the Board after erasing the Board */
+    public void restoreShips(Ship[] s) {
+    	for ( int i=0 ; i<s.length ; i++ )
+    		placeShip(s[i],s[i].getX(),s[i].getY(),s[i].isVertical());
+    }
+
+    /* Removes the Ship to replace it in new Places */
+    public boolean removeShip(Ship s, int fromX, int fromY) {
+        if ( s.isVertical() ) {
+            for ( int i=fromX ; i<fromX+s.getLength()-1 ; i++ ) {
+            	//System.out.println("hasShip("+i+","+fromY +")="+hasShip(i,fromY));
+                if ( s.isAt(i,fromY) )
+                    board[i][fromY] = new Place(i,fromY); //board[i][fromY].removeShip();
+                else
+                    return false; //has no Ship to remove
+            }
+        } else {
+            for ( int j=fromY ; j<fromY+s.getLength()-1 ; j++ ) {
+            	//System.out.println("hasShip("+fromX+","+j +")="+hasShip(fromX,j));
+                if ( s.isAt(fromX,j) )
+                    board[fromX][j] = new Place(fromX,j); //board[fromX][j].removeShip();
+                else
+                    return false; //has no Ship to remove
+            }
+        }
+        return true;
     }
 }
