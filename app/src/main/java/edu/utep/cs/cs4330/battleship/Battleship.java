@@ -111,6 +111,14 @@ public class Battleship {
         return player1.moveShip(s,changeX,changeY);
     }
 
+    /* Sets the opponent Players' Boards */
+    public void setPlayer1Board(Board b) {
+        player1.setBoard(b);
+    }
+    public void setPlayer2Board(Board b) {
+        player2.setBoard(b);
+    }
+
     public Ship[] userShips() {
     	return player1.ships();
     }

@@ -40,6 +40,7 @@ public class GameActivity extends AppCompatActivity {
                 hit(x,y);
             }
         });
+        assignBoards();
         setBoards();
 
         shotsLabel = (TextView) findViewById(R.id.shots);
@@ -54,6 +55,15 @@ public class GameActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
+    /* On create, set the Boards to apply the hits to the opponent Player's Boards */
+    private void assignBoards() {
+        Board computerDesigned = game.computerBoard();
+        Board userDesigned = game.userBoard();
+        game.setPlayer1Board(null);
+        game.setPlayer2Board(null);
+        game.setPlayer1Board(computerDesigned);
+        game.setPlayer2Board(userDesigned);
+    }
     /* Establishes the Players' Boards to their opponents' BoardViews */
     private void setBoards() {
         userBV.setBoard(game.userBoard());
@@ -78,7 +88,7 @@ public class GameActivity extends AppCompatActivity {
             game.player2Hit();
             setBoards();
         }
-        //updateShots(); //FIXME why crash here?
+        updateShots(); //FIXME why crash here?
     }
 
     /* Display the number of shots made on the Board by the user Player */
