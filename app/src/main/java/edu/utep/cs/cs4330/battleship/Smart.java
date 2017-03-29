@@ -57,12 +57,28 @@ public class Smart {
         for ( int i=startX ; i<hit.length ; i++ )
             for ( int j=startY ; j<hit[i].length ; j++ ) {
                 if ( hit[i][j] && hadShip[i][j] ) {
-                    //check if this ship has already been sunk N/S/E/W
+                    //TODO the smart choose should be implemented
+                    //check if this ship has already been sunk
+                    //if ( !sunkShip(i,j) )
+                        //return findPlaceToSink(i,j);
                     //if already sunk, choose another place
                     //find the nearest place if it has not been sunk
                 }
                 place.setIndex(i,j);
             }
         return previous = new Place(place.getX(),place.getY());
+    }
+    private boolean sunkShip(int x, int y) {
+        /* Checks if any of the known Ships have been sunk */
+        for ( int i=0 ; i<sunk.length ; i++ )
+            ;//if ( sunk[i].sunk() )
+        return false;
+    }
+    private boolean hasBeenSunk(int x, int y) {
+        /* Checks to left, right, up, and down if Ship has been discovered */
+        for ( int i=0 ; i<sunk.length ; i++ )
+            if ( sunk[i].getX()==x && sunk[i].getY()==y )
+                ;
+        return false;
     }
 }

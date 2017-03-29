@@ -8,7 +8,10 @@
 
 package edu.utep.cs.cs4330.battleship;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -20,6 +23,7 @@ public class GameActivity extends AppCompatActivity {
     private BoardView userBV;
     private BoardView compBV;
     private TextView shotsLabel;
+    private boolean createNewGame;
 
     @Override
     protected void onCreate(Bundle s) {
@@ -73,10 +77,7 @@ public class GameActivity extends AppCompatActivity {
 
     /* Dialog confirmation to user on newButton clicked */
     public void newClicked(View v) {
-        game.createNewGame();
-        Intent intent = new Intent(getApplicationContext(),MainActivity.class);
-        startActivity(intent);
-        //TODO dialog confirmation
+        startNew();
     }
 
     /* Show Player played a hit on the Board */
@@ -88,7 +89,48 @@ public class GameActivity extends AppCompatActivity {
             game.player2Hit();
             setBoards();
         }
-        updateShots(); //FIXME why crash here?
+        updateShots();
+        if ( hasWinner() )
+            startNew();
+    }
+    private boolean hasWinner() {
+        if ( game.computerWon() ) {
+            toast("Computer won!");
+            return true;
+        } else {
+            if ( game.userWon() ) {
+                toast("Player won!");
+                return true;
+            } else return false;
+        }
+    }
+    private void startNew() {
+        createDialog();
+        if ( createNewGame ) {
+            game.createNewGame();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+        }
+    }
+    private void createDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(R.string.newGameRequest);
+        alertDialogBuilder.setPositiveButton("Yes",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        createNewGame = true;
+                    }
+                });
+        alertDialogBuilder.setNegativeButton("No",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        createNewGame = false;
+                    }
+                });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     /* Display the number of shots made on the Board by the user Player */

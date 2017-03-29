@@ -24,4 +24,7 @@
     <string name="right">+</string>
     <string name="up">^</string>
     <string name="down">v</string>
+
+    <!-- Dialog -->
+    <string name="newGameRequest">Start New Game?</string>
 </resources>

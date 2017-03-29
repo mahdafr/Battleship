@@ -51,15 +51,11 @@ public class Battleship {
 
     public boolean computerWon() {
         /* Returns whether the computer Player won the game or not */
-        return player1.lostGame();
+        return player2.hasWon();
     }
     public boolean userWon() {
         /* Returns whether the user/human Player won the game or not */
-        return player2.lostGame();
-    }
-    public boolean isOver() {
-        /* Returns whether there are any more Ships to sink */
-        return ( player1.lostGame() || player2.lostGame() );
+        return player1.hasWon();
     }
 
     public void createNewGame() {

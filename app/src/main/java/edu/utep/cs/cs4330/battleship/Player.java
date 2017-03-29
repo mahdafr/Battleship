@@ -18,11 +18,13 @@ public class Player {
     @SuppressWarnings("unused")
 	private int wins;
     private int shots;
+    private int hits;
     /* The computer Player's Strategy */
     private Strategy strategy;
     /* This Player's Board and Ships */
     private Board board;
     private Ship[] ship;
+    private int SHIPPIECES;
     /* Track if it is this Player's turn */
     private boolean turn;
     /* Keeping track of the Ships sunk by and against this Player */
@@ -32,6 +34,8 @@ public class Player {
         wins = 0;
         shipsSunk = 0;
         shots = 0;
+        hits = 0;
+        SHIPPIECES = 0;
         initShips(ships);
         initBoard(board);
         turn = false;
@@ -40,8 +44,10 @@ public class Player {
     private void initShips(int ships) {
         /* Create the Ships for the game */
         ship = new Ship[ships];
-        for ( int i=0 ; i<ships ; i++ )
+        for ( int i=0 ; i<ships ; i++ ) {
             ship[i] = new Ship(i);
+            SHIPPIECES += ship[i].getLength();
+        }
     }
 
     private void initBoard(int b) {
@@ -59,17 +65,9 @@ public class Player {
         name = n;
     }
 
-    public void won() {
+    private void won() {
         /* This Player has won this game */
         wins++;
-    }
-
-    public Boolean lostGame() {
-        /* This Player lost the game if all of his/her Ships are sunk */
-        for ( int i=0 ; i<ship.length ; i++ )
-            if ( !ship[i].sunk() )
-                return false;
-        return true;
     }
 
     public void placeShips() {
@@ -115,7 +113,10 @@ public class Player {
         /* The opposing Player made a hit on this Player's Board.
          * Returns TRUE if the hit was not a miss. */
         shots++;
-        return board.hit(x,y);
+        if ( board.hit(x,y) ) {
+            hits++;
+            return true;
+        } return false;
     }
 
     public void switchTurn() {
@@ -132,7 +133,11 @@ public class Player {
 
     public boolean hasWon() {
         /* Has this Player won the game? */
-        return board.shipsSunk() || shipsSunk==ship.length;
+        if ( hits>SHIPPIECES || board.shipsSunk() || shipsSunk==ship.length ) {
+            wins++;
+            return true;
+        }
+        return false;
     }
 
     public boolean isGameOver() {
