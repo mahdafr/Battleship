@@ -71,7 +71,6 @@ public class GameActivity extends AppCompatActivity {
     private void setBoards() {
         userBV.setBoard(game.userBoard());
         compBV.setBoard(game.computerBoard());
-        //FIXME userBV shows computerBoard (user hits computer's Board)
     }
 
     /* Dialog confirmation to user on newButton clicked */

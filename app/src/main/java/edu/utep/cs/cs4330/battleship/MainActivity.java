@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
-
     /* Starts a LOCAL game upon click */
     public void LOCALclicked(View v) {
         toast("playing against local opponent");

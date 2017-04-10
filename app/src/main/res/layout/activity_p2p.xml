@@ -22,13 +22,6 @@
         android:orientation="vertical">
 
         <Button
-            android:text="@string/local"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/local"
-            android:onClick="LOCALclicked"/>
-
-        <Button
             android:text="@string/p2p"
             android:layout_marginTop="50dp"
             android:layout_width="wrap_content"
