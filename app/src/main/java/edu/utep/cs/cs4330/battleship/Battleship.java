@@ -133,6 +133,7 @@ public class Battleship {
             switchTurns();
             return false;
         }
+        player2.hitGood();
         return true;
     }
     /* Returns the number of shots made by the user Player */

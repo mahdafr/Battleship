@@ -12,6 +12,7 @@
     <string name="shot0">0 Shots</string>
 
     <!-- The difficulty to play against -->
+    <string name="difficulty">Set Difficulty</string>
     <string name="smart">High Difficulty</string>
     <string name="random">Low Difficulty</string>
 
@@ -24,6 +25,12 @@
     <string name="right">+</string>
     <string name="up">^</string>
     <string name="down">v</string>
+
+    <!-- Game Opponent Type -->
+    <string name="opponent_label">Choose an opponent to play Battleship.</string>
+    <string name="local">Play Locally</string>
+    <string name="p2p">Play on Network</string>
+    <string name="ai">Play Computer</string>
 
     <!-- Dialog -->
     <string name="newGameRequest">Start New Game?</string>

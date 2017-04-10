@@ -23,7 +23,6 @@ public class GameActivity extends AppCompatActivity {
     private BoardView userBV;
     private BoardView compBV;
     private TextView shotsLabel;
-    private boolean createNewGame;
 
     @Override
     protected void onCreate(Bundle s) {
@@ -77,7 +76,7 @@ public class GameActivity extends AppCompatActivity {
 
     /* Dialog confirmation to user on newButton clicked */
     public void newClicked(View v) {
-        startNew();
+        createDialog();
     }
 
     /* Show Player played a hit on the Board */
@@ -105,12 +104,12 @@ public class GameActivity extends AppCompatActivity {
         }
     }
     private void startNew() {
-        createDialog();
-        if ( createNewGame ) {
-            game.createNewGame();
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(intent);
-        }
+        game.createNewGame();
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+    }
+    private void continueGame() {
+        //TODO idk wut to do here...
     }
     private void createDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -119,14 +118,14 @@ public class GameActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        createNewGame = true;
+                        startNew();
                     }
                 });
         alertDialogBuilder.setNegativeButton("No",
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        createNewGame = false;
+                        continueGame();
                     }
                 });
         AlertDialog alertDialog = alertDialogBuilder.create();

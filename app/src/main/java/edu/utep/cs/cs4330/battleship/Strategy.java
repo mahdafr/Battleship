@@ -54,8 +54,14 @@ public class Strategy {
             return new Place(x,y);
         } else {
             //smart chooses a hit
-            return smart.chooseHit();
+            Place p = smart.chooseHit();
+            //System.out.println("smart chose " + p.getX()+","+ p.getY());
+            return p;
         }
+    }
+    public void hitGood() {
+    	if ( smart!=null )
+    		smart.hitGood();
     }
 
     /* When restoring the state of the game */

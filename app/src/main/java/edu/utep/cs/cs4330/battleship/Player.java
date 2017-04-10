@@ -130,6 +130,9 @@ public class Player {
         shots++;
         return board.hit(strategy.chooseHit());
     }
+    public void hitGood() {
+    	strategy.hitGood();
+    }
 
     public boolean hasWon() {
         /* Has this Player won the game? */

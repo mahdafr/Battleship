@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="edu.utep.cs.cs4330.battleship.MainActivity">
+    tools:context="edu.utep.cs.cs4330.battleship.P2PActivity">
 
     <TextView
         android:layout_width="wrap_content"

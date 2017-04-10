@@ -8,6 +8,8 @@
 
 package edu.utep.cs.cs4330.battleship;
 
+import android.util.Log;
+
 public class Smart {
     /* Knowledge of where was already a hit or was a miss */
     private boolean hit[][];
@@ -17,9 +19,9 @@ public class Smart {
 
     public Smart(int size, int ships) {
         sunk = new Ship[ships];
-        previous = null;
         hit = new boolean[size][size];
         hadShip = new boolean[size][size];
+        previous = randomize();
         clearMemory();
     }
 
@@ -43,30 +45,48 @@ public class Smart {
                 hadShip[i][j] = false;
             }
     }
+    
+    public void hitGood() {
+    	hadShip[previous.getX()][previous.getY()] = true;
+    }
 
     public Place chooseHit() {
         /* Finds the X and Y- coordinates to Hit using a goal-winning Strategy */
-        Place place = new Place();
         int startX, startY;
-        if ( previous==null ) //randomize the first hit
-            startX = startY = new java.util.Random().nextInt(hit.length);
-        else {
-            startX = previous.getX();
-            startY = previous.getY();
+        startX = previous.getX();
+        startY = previous.getY();
+        Log.d("SMART","previous @ " +startX+ ", " +startY);
+        if ( hadShip[startX][startY] ) {
+            // can go south
+            if ( possible(startX+1,startY) && !hit[startX+1][startY] )
+                return previous = new Place(startX+1,startY);
+            //can go north
+            if ( possible(startX-1,startY) && !hit[startX-1][startY] )
+                return previous = new Place(startX-1,startY);
+            // can go east
+            if ( possible(startX,startY+1) && !hit[startX][startY+1] )
+                return previous = new Place(startX,startY);
+            //can go north
+            if ( possible(startX,startY-1) && !hit[startX][startY-1] )
+                return previous = new Place(startX,startY-1);
         }
-        for ( int i=startX ; i<hit.length ; i++ )
-            for ( int j=startY ; j<hit[i].length ; j++ ) {
-                if ( hit[i][j] && hadShip[i][j] ) {
-                    //TODO the smart choose should be implemented
-                    //check if this ship has already been sunk
-                    //if ( !sunkShip(i,j) )
-                        //return findPlaceToSink(i,j);
-                    //if already sunk, choose another place
-                    //find the nearest place if it has not been sunk
-                }
-                place.setIndex(i,j);
-            }
-        return previous = new Place(place.getX(),place.getY());
+        return randomize();
+    }
+    private boolean possible(int x, int y) {
+    	Log.d("SMART","checking if " +x+ ", " +y+ " be gucci?");
+        if ( x<0 || y<0 ) //out of bounds
+            return false;
+        if ( x>=hit.length || y>=hit.length ) //out of bounds
+            return false;
+        if ( hit[x][y] ) //already hit
+            return false;
+        return true;
+    }
+    private Place randomize() {
+    	//System.out.println("randomizing place");
+    	int startX = new java.util.Random().nextInt(hit.length);
+        int startY = new java.util.Random().nextInt(hit.length);
+        return previous = new Place(startX,startY);
     }
     private boolean sunkShip(int x, int y) {
         /* Checks if any of the known Ships have been sunk */
