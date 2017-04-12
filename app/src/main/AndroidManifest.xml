@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.utep.cs.cs4330.battleship">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,19 +28,12 @@
         </activity>
 
         <!-- Game Activity -->
-        <activity android:name=".GameActivity">
-            android:configChanges="orientation|keyboardHidden|screenSize"
+        <activity android:name=".GameActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
 
-        <!-- AI-Choosing Activity -->
-        <activity
-            android:name=".AIActivity"
-            android:screenOrientation="portrait" />
-        <activity android:name=".P2PActivity" />
-        <activity
-            android:name=".HumanDeployActivity"
-            android:label="@string/title_activity_human_deploy"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <!-- Deploy Ships -->
+        <activity android:name=".HumanDeployActivity"/>
     </application>
 
 </manifest>
