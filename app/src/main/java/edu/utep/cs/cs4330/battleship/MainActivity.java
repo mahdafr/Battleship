@@ -3,6 +3,7 @@ package edu.utep.cs.cs4330.battleship;
         import android.content.Intent;
         import android.support.v7.app.AppCompatActivity;
         import android.os.Bundle;
+        import android.util.Log;
         import android.view.View;
         import android.widget.Toast;
 
@@ -36,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
     /* Starts a game against the AI upon click */
     public void AIclicked(View v) {
         toast("plaing AI");
-        Intent intent = new Intent(getApplicationContext(),AIActivity.class);
+        Intent intent = new Intent(getApplicationContext(),HumanDeployActivity.class);
+        Log.d("MAIN ACT","intent made");
         startActivity(intent);
     }
 }

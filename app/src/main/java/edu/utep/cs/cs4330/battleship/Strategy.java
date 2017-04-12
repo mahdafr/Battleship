@@ -36,8 +36,8 @@ public class Strategy {
             //choose the direction for each Ship
             ship[i].setDirection(r.nextBoolean());
             //choose the X- and Y- positions for the Ship
-            int x = r.nextInt(board.size());
-            int y = r.nextInt(board.size());
+            int x = r.nextInt(board.getSize());
+            int y = r.nextInt(board.getSize());
             if ( !board.placeShip(ship[i],x,y,ship[i].isVertical()) )
                 i--;
         }

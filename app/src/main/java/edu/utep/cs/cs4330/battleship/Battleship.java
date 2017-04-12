@@ -64,11 +64,11 @@ public class Battleship {
 
     public Board userBoard() {
         /* Returns the user's Board */
-        return player1.board();
+        return player1.getBoard();
     }
     public Board computerBoard() {
         /* Returns the computer's Board */
-        return player2.board();
+        return player2.getBoard();
     }
 
     public boolean playerTurn() {
@@ -116,7 +116,7 @@ public class Battleship {
     }
 
     public Ship[] userShips() {
-    	return player1.ships();
+    	return player1.getShips();
     }
 
     /* If the user Player hit a Ship, they can keep hitting */
@@ -136,6 +136,8 @@ public class Battleship {
         player2.hitGood();
         return true;
     }
+
+
     /* Returns the number of shots made by the user Player */
     public int userShots() {
         return player1.shots();
