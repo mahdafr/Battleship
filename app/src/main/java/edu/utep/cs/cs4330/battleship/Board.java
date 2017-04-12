@@ -29,7 +29,7 @@ public class Board { //implements Serializable {
     }
 
     /** Return the size of this board. */
-    public int size() {
+    public int getSize() {
         return size;
     }
 
@@ -133,7 +133,7 @@ public class Board { //implements Serializable {
         return hit(place.getX(),place.getY());
     }
 
-    private Place at(int x, int y) {
+    public Place at(int x, int y) {
         /* Get the place at this index (X,Y) */
         return board[x][y];
     }

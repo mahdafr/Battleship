@@ -28,8 +28,12 @@
         <!-- AI-Choosing Activity -->
         <activity
             android:name=".AIActivity"
-            android:screenOrientation="portrait"></activity>
-        <activity android:name=".P2PActivity"></activity>
+            android:screenOrientation="portrait" />
+        <activity android:name=".P2PActivity" />
+        <activity
+            android:name=".HumanDeployActivity"
+            android:label="@string/title_activity_human_deploy"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
