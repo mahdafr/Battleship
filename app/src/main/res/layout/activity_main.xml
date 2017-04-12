@@ -28,21 +28,19 @@
             android:id="@+id/local"
             android:onClick="LOCALclicked"/>
 
-        <Button
-            android:text="@string/p2p"
+        <Spinner
+            android:id="@+id/P2Pspinner"
             android:layout_marginTop="50dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/p2p"
-            android:onClick="P2Pclicked"/>
+            android:entries="@array/p2p"/>
 
-        <Button
-            android:text="@string/ai"
+        <Spinner
+            android:id="@+id/AIspinner"
             android:layout_marginTop="50dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/ai"
-            android:onClick="AIclicked"/>
+            android:entries="@array/ai"/>
     </LinearLayout>
 
 </RelativeLayout>
