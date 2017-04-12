@@ -25,7 +25,8 @@
             android:id="@+id/ship_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/shipText"/>
+            android:layout_below="@id/shipText"
+            android:entries="@array/ships_array"/>
 
         <ImageButton
             android:id="@+id/rotateLeft"
@@ -113,8 +114,8 @@
 
         <edu.utep.cs.cs4330.battleship.BoardView
             android:id="@+id/boardView"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_below="@id/done_button"
             />

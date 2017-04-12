@@ -136,6 +136,8 @@ public class Battleship {
         player2.hitGood();
         return true;
     }
+
+
     /* Returns the number of shots made by the user Player */
     public int userShots() {
         return player1.shots();

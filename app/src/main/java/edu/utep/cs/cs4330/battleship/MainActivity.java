@@ -1,5 +1,13 @@
 package edu.utep.cs.cs4330.battleship;
 
+<<<<<<< HEAD
+        import android.content.Intent;
+        import android.support.v7.app.AppCompatActivity;
+        import android.os.Bundle;
+        import android.util.Log;
+        import android.view.View;
+        import android.widget.Toast;
+=======
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +18,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 import java.lang.reflect.Array;
+>>>>>>> master
 
 public class MainActivity extends AppCompatActivity {
     private Battleship game;
@@ -92,11 +101,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+<<<<<<< HEAD
+    /* Starts a game against the AI upon click */
+    public void AIclicked(View v) {
+        toast("plaing AI");
+        Intent intent = new Intent(getApplicationContext(),HumanDeployActivity.class);
+        Log.d("MAIN ACT","intent made");
+=======
     /* Starts the Battleship Game */
     private void startGame() {
         //TODO set the right activity call boi
         Intent intent = new Intent(getApplicationContext(),HumanDeployActivity.class);
         //Intent intent = new Intent(getApplicationContext(),GameActivity.class);
+>>>>>>> master
         startActivity(intent);
     }
 }
