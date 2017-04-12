@@ -4,6 +4,7 @@
     <string name="new_button_label">New</string>
     <string name="create_button_label">Create Game</string>
     <string name="rotate_ship_label">Rotate Ship</string>
+    <string name="quit_button_label">Quit</string>
 
     <!-- Ships for Placement -->
     <string name="instr">Place each ship. Click the buttons to control each ship.</string>
@@ -34,4 +35,5 @@
 
     <!-- Dialog -->
     <string name="newGameRequest">Start New Game?</string>
+    <string name="title_activity_human_deploy">HumanDeployActivity</string>
 </resources>

@@ -80,7 +80,7 @@ public class BoardView extends View {
     /** Set the board to to be displayed by this view. */
     public void setBoard(Board board) {
         this.board = board;
-        this.boardSize = board.size();
+        this.boardSize = board.getSize();
         canShowShips = false; //@created Mahdokht Afravi on 03.05 U
         invalidate(); //@modified Mahdokht Afravi on 03.05 U
     }
@@ -132,7 +132,7 @@ public class BoardView extends View {
     }
     public void setUserBoard(Board b) {
         board = b;
-        boardSize = board.size();
+        boardSize = board.getSize();
         canShowShips = true;
         invalidate();
     }

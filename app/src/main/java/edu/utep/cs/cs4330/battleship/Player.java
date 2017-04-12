@@ -57,7 +57,7 @@ public class Player {
 
     public void setStrategy(boolean smartPlay) {
         /* Gives a Strategy to this computer Player */
-        strategy = new Strategy(smartPlay,board.size(),ship.length);
+        strategy = new Strategy(smartPlay,board.getSize(),ship.length);
     }
 
     public void setName(String n) {
@@ -80,7 +80,7 @@ public class Player {
         board.placeShip(s, x, y, s.isVertical());
     }
 
-    public Board board() {
+    public Board getBoard() {
         /* Get this Player's board */
         return board;
     }
@@ -162,7 +162,7 @@ public class Player {
     }
     
     /* Returns this Player's Ships */
-    public Ship[] ships() {
+    public Ship[] getShips() {
     	return ship;
     }
 
