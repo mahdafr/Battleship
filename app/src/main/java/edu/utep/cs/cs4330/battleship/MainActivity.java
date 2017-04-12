@@ -91,13 +91,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /* Starts a game against the AI upon click */
-    public void AIclicked(View v) {
-        toast("plaing AI");
-        Intent intent = new Intent(getApplicationContext(), HumanDeployActivity.class);
-        Log.d("MAIN ACT", "intent made");
-    }
-
     /* Starts the Battleship Game */
     private void startGame() {
         //TODO set the right activity call boi
