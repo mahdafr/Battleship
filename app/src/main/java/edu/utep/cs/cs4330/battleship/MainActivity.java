@@ -12,8 +12,14 @@ package edu.utep.cs.cs4330.battleship;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -117,13 +123,12 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     private void startBTGame() {
-        //gets a list of paired BT devices to connect to
+        //activity (settings): connects to bluetooth
         if ( !BTenabled() )
             turnOnBT();
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         btAdapter.startDiscovery();
-        Intent intent = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
-        startActivity(intent);
+        startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
         if ( btAdapter.getProfileConnectionState(BluetoothProfile.A2DP)==btAdapter.STATE_CONNECTED )
             startGame();
         else createTryAgainDialog("Bluetooth not connected!","Try Again","Cancel");
@@ -132,23 +137,33 @@ public class MainActivity extends AppCompatActivity {
     /* Wifi Functionality */
     private boolean WFenabled() {
         //checks if WF is on
-
-        return false;
+        WifiManager m = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        return m.isWifiEnabled();
     }
     private void turnOnWF() {
         //creates a window alert: user permission to turn on WF
-
+        WifiManager m = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
     }
     private void startWFGame() {
-        //gets a list of available wifi networks to connect to
+        //activity (settings): connects to wifi
         if ( !WFenabled() )
             turnOnWF();
-        //todo finish me
+        //fixme it jumps straight to error dialog before turnOnWF()
+        /*
+        ConnectivityManager m = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo wifi = m.getNetworkInfo(ConnectivityManager.TYPE_WIFI); //deprecated
+        if ( wifi.isConnected() ) startGame();*/
+        // /*
+        WifiManager m = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifi = m.getConnectionInfo();
+        if ( wifi.getNetworkId()!=-1 ) startGame(); //*/
+        else createTryAgainDialog("Wifi not connected!","Try Again","Cancel");
     }
 
     /* Wifi Direct Functionality */
     private void startWFDirectGame() {
-        //todo extra credit gurl
+        //todo extra credit boi
     }
 
     /* Creates a dialog for user confirmation */
@@ -159,14 +174,14 @@ public class MainActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        //TODO handle this?
+                        setP2PSpinner(); //fixme what do when user wants to try connecting again?
                     }
                 });
         alertDialogBuilder.setNegativeButton(negative,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        //TODO handle this?
+                        recreate(); //fixme what do when user doesn't want to connect?
                     }
                 });
         AlertDialog alertDialog = alertDialogBuilder.create();
