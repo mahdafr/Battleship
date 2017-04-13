@@ -1,14 +1,29 @@
+/*
+ * @created Mahdokht Afravi on 04/08 S
+ *
+ * Starts the Battleship App by asking the user
+ *   to choose a method of playing the game:
+ *   against a local opponent, a network opponent,
+ *   or the computer.
+ *
+ * @modified Mahdokht Afravi on 04/12 W
+ */
 package edu.utep.cs.cs4330.battleship;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothProfile;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
     private Battleship game;
@@ -44,16 +59,13 @@ public class MainActivity extends AppCompatActivity {
                     case 0: //name: Play on Network
                         break;
                     case 1: //Bluetooth
-                        //TODO turn on if was off through settings and connect to device
-                        startGame();
+                        startBTGame();
                         break;
                     case 2: //Wifi Direct
-                        //TODO dat extra 10 points doe
-                        startGame();
+                        startWFDirectGame();
                         break;
                     case 3: //Wifi
-                        //TODO turn on if was off through settings and connect to network
-                        startGame();
+                        startWFGame();
                         break;
                 }
             }
@@ -91,11 +103,78 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /* Bluetooth Functionality */
+    private boolean BTenabled() {
+        //checks if BT is on
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if ( btAdapter!=null && btAdapter.isEnabled() )
+            return true;
+        return false;
+    }
+    private void turnOnBT() {
+        //creates a window alert: user permission to turn on BT
+        Intent intent = new Intent(BluetoothAdapter.getDefaultAdapter().ACTION_REQUEST_ENABLE);
+        startActivity(intent);
+    }
+    private void startBTGame() {
+        //gets a list of paired BT devices to connect to
+        if ( !BTenabled() )
+            turnOnBT();
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        btAdapter.startDiscovery();
+        Intent intent = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+        startActivity(intent);
+        if ( btAdapter.getProfileConnectionState(BluetoothProfile.A2DP)==btAdapter.STATE_CONNECTED )
+            startGame();
+        else createTryAgainDialog("Bluetooth not connected!","Try Again","Cancel");
+    }
+
+    /* Wifi Functionality */
+    private boolean WFenabled() {
+        //checks if WF is on
+
+        return false;
+    }
+    private void turnOnWF() {
+        //creates a window alert: user permission to turn on WF
+
+    }
+    private void startWFGame() {
+        //gets a list of available wifi networks to connect to
+        if ( !WFenabled() )
+            turnOnWF();
+        //todo finish me
+    }
+
+    /* Wifi Direct Functionality */
+    private void startWFDirectGame() {
+        //todo extra credit gurl
+    }
+
+    /* Creates a dialog for user confirmation */
+    private void createTryAgainDialog(String msg, String positive, String negative) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(msg);
+        alertDialogBuilder.setPositiveButton(positive,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        //TODO handle this?
+                    }
+                });
+        alertDialogBuilder.setNegativeButton(negative,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        //TODO handle this?
+                    }
+                });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();}
+
     /* Starts the Battleship Game */
     private void startGame() {
-        //TODO set the right activity call boi
         Intent intent = new Intent(getApplicationContext(),HumanDeployActivity.class);
-        //Intent intent = new Intent(getApplicationContext(),GameActivity.class);
         startActivity(intent);
     }
 }
