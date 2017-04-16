@@ -21,12 +21,13 @@
         android:layout_marginTop="125dp"
         android:orientation="vertical">
 
+        <!--
         <Button
             android:text="@string/local"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/local"
-            android:onClick="LOCALclicked"/>
+            android:onClick="LOCALclicked"/> -->
 
         <Spinner
             android:id="@+id/P2Pspinner"
