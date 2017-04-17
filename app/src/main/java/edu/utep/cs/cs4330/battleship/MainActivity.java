@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     Spinner p2p, ai;
     int conectionType;
     boolean connected;
+    Socket opponentSocket;
+    boolean client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,11 +170,27 @@ public class MainActivity extends AppCompatActivity {
 
         if ( wifi.getNetworkId()!=-1 ) {
             connectPlayers();
+
+            //Wait for connection thread to be done.
             while(true){
                 if(connected){
                     break;
                 }
             }
+
+
+            //IF we are the client of the game
+            if(client){
+                Battleship.getGame().setIsClient(true);
+            }
+
+
+            //IF we are the server of the game
+            else{
+                Battleship.getGame().setIsClient(false);
+            }
+
+
             startGame();
         }
 
@@ -202,8 +220,16 @@ public class MainActivity extends AppCompatActivity {
                     //This is the other client's IP
                     String otherIP = in.readLine();
 
+
                     //This is the other client's PORT number
                     String otherPORT = in.readLine();
+
+                    //This is stating whether This is the client or the server
+                    String clientBoolean = in.readLine();
+                    if(clientBoolean.equals("true")) client = true;
+
+                    opponentSocket = new Socket(otherIP, 2027);
+                    Battleship.getGame().initializeAdapter(opponentSocket);
 
                     connected = true;
 

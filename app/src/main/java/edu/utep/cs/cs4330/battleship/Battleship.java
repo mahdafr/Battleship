@@ -8,11 +8,16 @@
 
 package edu.utep.cs.cs4330.battleship;
 
+import java.net.Socket;
+
 public class Battleship {
     /* The Players in the Game */
     private Player player1;
     private Player player2;
     private static Battleship instance = new Battleship(10,5);
+
+    private NetworkAdapter playerConnection;
+    private boolean isClient;
 
     private Battleship(int b, int s) {
         initPlayers(b,s);
@@ -23,6 +28,20 @@ public class Battleship {
             instance = new Battleship(10,5);
         return instance;
     }
+
+    public void setIsClient(boolean client){
+        isClient = client;
+    }
+
+    public void initializeAdapter(Socket wifiSocket){
+        playerConnection = new NetworkAdapter(wifiSocket);
+    }
+
+
+    public NetworkAdapter getPlayerConnection() {
+        return playerConnection;
+    }
+
 
     private void initPlayers(int b, int s) {
         /* Create the Players for the Battleship Game */

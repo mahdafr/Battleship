@@ -172,6 +172,48 @@ public class HumanDeployActivity extends AppCompatActivity{
      * @param view - The button pressed
      */
     public void placeShips(View view){
+
+        //Create new fleet message (4 things per ship, 5 ships)
+        int [] fleetMessage = new int [4*5];
+
+        int index = 0;
+
+        for(Ship currentShip : Battleship.getGame().userShips()){
+
+            //4 entries per ship
+            for(int i = 0; i < 4; i++){
+                switch(i){
+                    //Adding the size of the current ship
+                    case 0:
+                        fleetMessage[index] = currentShip.getSize();
+                        break;
+
+                    //Adding the starting x position
+                    case 1:
+                        fleetMessage[index] = currentShip.inPlaces()[0].getX();
+                        break;
+
+
+                    //Adding the starting y postition
+                    case 2:
+                        fleetMessage[index] = currentShip.inPlaces()[0].getY();
+                        break;
+
+                    //Adding the direction of the current ship
+                    case 3:
+                        if(currentShip.isVertical())
+                            fleetMessage[index] = 0;
+
+                        else
+                            fleetMessage[index] = 1;
+
+                        break;
+                }
+
+                index++;
+            }
+        }
+
         Intent intent = new Intent(getBaseContext(), GameActivity.class);
         startActivity(intent);
         finish();
