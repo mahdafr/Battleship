@@ -7,9 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.AsyncTask;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -21,10 +23,19 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+
 public class MainActivity extends AppCompatActivity {
     private Battleship game;
     Spinner p2p, ai;
     int conectionType;
+    boolean connected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         setP2PSpinner();
         ai = (Spinner) findViewById(R.id.AIspinner);
         setAISpinner();
+        connected = false;
     }
 
     /** Show a toast message. */
@@ -109,11 +121,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         return false;
     }
+
     private void turnOnBT() {
         //creates a window alert: user permission to turn on BT
         Intent intent = new Intent(BluetoothAdapter.getDefaultAdapter().ACTION_REQUEST_ENABLE);
         startActivity(intent);
     }
+
     private void startBTGame() {
         //activity (settings): connects to bluetooth
         if ( !BTenabled() )
@@ -132,11 +146,13 @@ public class MainActivity extends AppCompatActivity {
         WifiManager m = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         return m.isWifiEnabled();
     }
+
     private void turnOnWF() {
         //creates a window alert: user permission to turn on WF
         WifiManager m = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
     }
+
     private void startWFGame() {
         //activity (settings): connects to wifi
         if ( !WFenabled() )
@@ -149,9 +165,60 @@ public class MainActivity extends AppCompatActivity {
         // /*
         WifiManager m = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifi = m.getConnectionInfo();
-        if ( wifi.getNetworkId()!=-1 ) startGame(); //*/
+
+        if ( wifi.getNetworkId()!=-1 ) {
+            connectPlayers();
+            while(true){
+                if(connected){
+                    break;
+                }
+            }
+            startGame();
+        }
+
         else createTryAgainDialog("Wifi not connected!","Try Again","Cancel");
     }
+
+    private boolean connectPlayers(){
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                //TODO your background code
+                try{
+                    //Connect to the connector socket
+                    Socket connectorSocket = new Socket("192.168.0.142", 8003);
+
+                    //To read from socket
+                    BufferedReader in
+                            = new BufferedReader(
+                            new InputStreamReader(connectorSocket.getInputStream()));
+
+                    //To write to socket
+                    PrintWriter out
+                            = new PrintWriter(
+                            new OutputStreamWriter(connectorSocket.getOutputStream()));
+
+                    //This is the other client's IP
+                    String otherIP = in.readLine();
+
+                    //This is the other client's PORT number
+                    String otherPORT = in.readLine();
+
+                    connected = true;
+
+                }
+                catch(IOException e){
+                    e.printStackTrace();
+                    Log.d("CONNECTING", e.toString());
+                }
+            }
+        });
+
+
+        return true;
+    }
+
 
     /* Wifi Direct Functionality */
     private void startWFDirectGame() {
