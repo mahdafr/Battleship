@@ -21,27 +21,49 @@
         android:layout_marginTop="125dp"
         android:orientation="vertical">
 
-        <!--
-        <Button
+        <!--<Button
             android:text="@string/local"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/local"
-            android:onClick="LOCALclicked"/> -->
+            android:onClick="LOCALclicked"/>-->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose P2P connection"
+            android:layout_marginTop="50dp"/>
 
         <Spinner
             android:id="@+id/P2Pspinner"
-            android:layout_marginTop="50dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:entries="@array/p2p"/>
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pair with other player"
+            android:onClick="connectPlayer"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose AI Difficulty"
+            android:layout_marginTop="50dp"/>
+
         <Spinner
             android:id="@+id/AIspinner"
-            android:layout_marginTop="50dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:entries="@array/ai"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Play vs AI"
+            android:onClick="startAIGame"/>
+
     </LinearLayout>
 
 </RelativeLayout>

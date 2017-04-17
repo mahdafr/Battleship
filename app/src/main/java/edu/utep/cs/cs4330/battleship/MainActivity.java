@@ -11,7 +11,10 @@
 package edu.utep.cs.cs4330.battleship;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,6 +27,7 @@ import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Toast;
 import android.widget.AdapterView;
@@ -31,14 +35,19 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.util.Log;
 
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity {
     private Battleship game;
     Spinner p2p, ai;
+    int conectionType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        conectionType = -1;
 
         game = game.getGame();
         p2p = (Spinner) findViewById(R.id.P2Pspinner);
@@ -62,16 +71,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch ( position ) {
-                    case 0: //name: Play on Network
+                    case 0: //Bluetooth
+                        //startBTGame();
+                        conectionType = 0;
                         break;
                     case 1: //Bluetooth
                         startBTGame();
+                        conectionType = 1;
                         break;
                     case 2: //Wifi Direct
                         startWFDirectGame();
                         break;
                     case 3: //Wifi
                         startWFGame();
+                        conectionType = 2;
                         break;
                 }
             }
@@ -90,15 +103,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch ( position ) {
-                    case 0: //name: Play AI
-                        break;
-                    case 1: //Smart
+                    case 0: //Smart
                         game.addSmartStrategy();
-                        startGame();
+                        //startGame();
                         break;
-                    case 2: //Random
+                    case 1: //Random
                         game.addRandomStrategy();
-                        startGame();
+                        //startGame();
                         break;
                 }
             }
@@ -124,14 +135,16 @@ public class MainActivity extends AppCompatActivity {
     }
     private void startBTGame() {
         //activity (settings): connects to bluetooth
-        if ( !BTenabled() )
-            turnOnBT();
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        btAdapter.startDiscovery();
         startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
-        if ( btAdapter.getProfileConnectionState(BluetoothProfile.A2DP)==btAdapter.STATE_CONNECTED )
-            startGame();
-        else createTryAgainDialog("Bluetooth not connected!","Try Again","Cancel");
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if ( !true ) //todo device not connected to another phone
+            createTryAgainDialog("Bluetooth not connected!","Try Again","Cancel");
+        /*/String remote = btAdapter.getAddress(); // format 00:00:00:00:00:00
+        UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+        BluetoothServerSocket btSS = btAdapter.listenUsingRfcommWithServiceRecord(name,SERIAL_UUID);
+        BluetoothDevice btDevice = btAdapter.getRemoteDevice(remote);
+        BluetoothSocket btS = btDevice.createRfcommSocketToServiceRecord(SERIAL_UUID);
+        btS.connect();*/
     }
 
     /* Wifi Functionality */
@@ -163,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
     /* Wifi Direct Functionality */
     private void startWFDirectGame() {
-        //todo extra credit boi
+
     }
 
     /* Creates a dialog for user confirmation */
@@ -191,5 +204,24 @@ public class MainActivity extends AppCompatActivity {
     private void startGame() {
         Intent intent = new Intent(getApplicationContext(),HumanDeployActivity.class);
         startActivity(intent);
+    }
+
+    public void startAIGame(View view){
+        Intent intent = new Intent(getApplicationContext(),HumanDeployActivity.class);
+        startActivity(intent);
+    }
+
+    public void connectPlayer(View view){
+        switch ( conectionType ) {
+            case 0: //Bluetooth
+                startBTGame();
+                break;
+            case 1: //Wifi Direct
+                startWFDirectGame();
+                break;
+            case 2: //Wifi
+                startWFGame();
+                break;
+        }
     }
 }
