@@ -6,20 +6,16 @@
  *   against a local opponent, a network opponent,
  *   or the computer.
  *
- * @modified Mahdokht Afravi on 04/12 W
+ * @modified Mahdokht Afravi on 04/17 M
  */
 package edu.utep.cs.cs4330.battleship;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.content.IntentFilter;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -27,7 +23,6 @@ import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Toast;
 import android.widget.AdapterView;
@@ -35,12 +30,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.util.Log;
 
-import java.util.UUID;
-
 public class MainActivity extends AppCompatActivity {
     private Battleship game;
     Spinner p2p, ai;
     int conectionType;
+    boolean wifiDirectAllowed;
+    //WifiDirect functionality
+    WifiP2pManager manager;
+    WifiP2pManager.Channel channel;
+    BroadcastReceiver receiver;
+    IntentFilter intentFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +48,26 @@ public class MainActivity extends AppCompatActivity {
 
         conectionType = -1;
 
+        createWD(); //set up for wifi direct
+
         game = game.getGame();
+        wifiDirectAllowed = false;
         p2p = (Spinner) findViewById(R.id.P2Pspinner);
         setP2PSpinner();
         ai = (Spinner) findViewById(R.id.AIspinner);
         setAISpinner();
+    }
+    /* Register the broadcast receiver with the intent values to be matched */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, intentFilter);
+    }
+    /* De-register the broadcast receiver */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     /** Show a toast message. */
@@ -62,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* Sets adapters to the Spinners */
-    private void setP2PSpinner() {
+    private void setP2PSpinner() {;
         //P2P Adapter
         ArrayAdapter<CharSequence> p2pAdapter = ArrayAdapter.createFromResource(this,R.array.p2p,android.R.layout.simple_spinner_item);
         p2pAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -71,16 +85,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch ( position ) {
-                    case 0: //Bluetooth
-                        //startBTGame();
-                        conectionType = 0;
+                    case 0: //name
+                        conectionType = -1;
                         break;
                     case 1: //Bluetooth
                         startBTGame();
-                        conectionType = 1;
+                        conectionType = 0;
                         break;
                     case 2: //Wifi Direct
-                        startWFDirectGame();
+                        if ( wifiDirectAllowed ) //phone has functionality: wifiDirect?
+                            conectionType = 1;
+                        else toast ("Phone has no WifiDirect capability");
                         break;
                     case 3: //Wifi
                         startWFGame();
@@ -121,30 +136,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* Bluetooth Functionality */
-    private boolean BTenabled() {
-        //checks if BT is on
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if ( btAdapter!=null && btAdapter.isEnabled() )
-            return true;
-        return false;
-    }
-    private void turnOnBT() {
-        //creates a window alert: user permission to turn on BT
-        Intent intent = new Intent(BluetoothAdapter.getDefaultAdapter().ACTION_REQUEST_ENABLE);
-        startActivity(intent);
-    }
     private void startBTGame() {
         //activity (settings): connects to bluetooth
         startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         if ( !true ) //todo device not connected to another phone
             createTryAgainDialog("Bluetooth not connected!","Try Again","Cancel");
-        /*/String remote = btAdapter.getAddress(); // format 00:00:00:00:00:00
-        UUID SERIAL_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-        BluetoothServerSocket btSS = btAdapter.listenUsingRfcommWithServiceRecord(name,SERIAL_UUID);
-        BluetoothDevice btDevice = btAdapter.getRemoteDevice(remote);
-        BluetoothSocket btS = btDevice.createRfcommSocketToServiceRecord(SERIAL_UUID);
-        btS.connect();*/
+        //String remote = btAdapter.getAddress(); // format 00:00:00:00:00:00
+        //UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+        //BluetoothServerSocket btSS = btAdapter.listenUsingRfcommWithServiceRecord(remote,uuid);
+        //BluetoothDevice btDevice = btAdapter.getRemoteDevice(remote);
+        //BluetoothSocket btS = btDevice.createRfcommSocketToServiceRecord(SERIAL_UUID);
+        //btS.connect();
     }
 
     /* Wifi Functionality */
@@ -175,8 +178,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* Wifi Direct Functionality */
+    private void createWD() {
+        //register Battleship with WifiP2p framework
+        manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        channel = manager.initialize(this, getMainLooper(), null);
+        receiver = new WifiBroadcastReceiver(manager, channel, this);
+        intentFilter = new IntentFilter();
+        //intent filter of intents the broadcast receiver checks for
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+    }
     private void startWFDirectGame() {
-
+        //uses WifiP2pManager to discover/connect to peers // TODO: 4/17/2017
+    }
+    protected void wifiDirectEnabled() {
+        //wifi direct is enabled on this phone, can play!
+        wifiDirectAllowed = true;
+    }
+    protected void wifiDirectDisabled() {
+        //wifi direct is not allowed on this phone, cannot play!
+        wifiDirectAllowed = false;
     }
 
     /* Creates a dialog for user confirmation */
@@ -187,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        setP2PSpinner(); //fixme what do when user wants to try connecting again?
+                        //todo what do when user wants to try connecting again?
                     }
                 });
         alertDialogBuilder.setNegativeButton(negative,
