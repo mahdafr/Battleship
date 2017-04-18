@@ -8,12 +8,11 @@
 
 package edu.utep.cs.cs4330.battleship;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +22,9 @@ public class GameActivity extends AppCompatActivity {
     private BoardView userBV;
     private BoardView compBV;
     private TextView shotsLabel;
+    private Message receivedMessage;
+    private Message lastSentMessage;
+    NetworkAdapter netAdapter;
 
     @Override
     protected void onCreate(Bundle s) {
@@ -31,6 +33,57 @@ public class GameActivity extends AppCompatActivity {
 
         //set the game
         game = game.getGame();
+        netAdapter = game.getPlayerConnection();
+
+        NetworkAdapter netAdapter = game.getPlayerConnection();
+        netAdapter.setMessageListener(new NetworkAdapter.MessageListener() {
+            public void messageReceived(NetworkAdapter.MessageType type, int x, int y, int[] others) {
+                switch (type) {
+                    case SHOT:
+                        receivedMessage = new Message(Message.MessageType.SHOT, x, y, others);
+                        break;
+
+                    case SHOT_ACK:
+                        receivedMessage = new Message(Message.MessageType.SHOT_ACK, x, y, others);
+                        break;
+
+                    case GAME:
+                        receivedMessage = new Message(Message.MessageType.GAME, x, y, others);
+                        break;
+
+                    case GAME_ACK:
+                        receivedMessage = new Message(Message.MessageType.GAME_ACK, x, y, others);
+                        break;
+
+                    case FLEET:
+                        receivedMessage = new Message(Message.MessageType.FLEET, x, y, others);
+                        break;
+
+                    case FLEET_ACK:
+                        receivedMessage = new Message(Message.MessageType.FLEET_ACK, x, y, others);
+                        break;
+
+                    case TURN:
+                        receivedMessage = new Message(Message.MessageType.TURN, x, y, others);
+                        break;
+
+                    case QUIT:
+                        receivedMessage = new Message(Message.MessageType.QUIT, x, y, others);
+                        break;
+
+                    case CLOSE:
+                        receivedMessage = new Message(Message.MessageType.CLOSE, x, y, others);
+                        break;
+
+                    case UNKNOWN:
+                        receivedMessage = new Message(Message.MessageType.UNKNOWN, x, y, others);
+                        break;
+
+                }
+            }
+        });
+
+
         userBV = (BoardView) findViewById(R.id.userBV);
         compBV = (BoardView) findViewById(R.id.compBV);
         userBV.setRadius(30);
@@ -40,20 +93,205 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onTouch(int x, int y) {
                 //toast(String.format("Touched: %d, %d", x, y));
-                hit(x,y);
+                hit(x, y);
             }
         });
+
+        exchangeFleets();
+        game.computerBoard().clearBoard();
+        game.computerBoard().restoreShips(game.opponentShips());
+
+        //===================================
         assignBoards();
         setBoards();
 
         shotsLabel = (TextView) findViewById(R.id.shots);
+    }
+
+    private void exchangeFleets() {
+
+        int[] player1Fleet = game.makeFleetMessage();
+
+        /**If this instance is the client then send his fleet first and wait for a FLEET ACK from the other player through the NetworkAdapter*/
+        if (game.isClient()) {
+
+            /**Send our fleet to our opponent (the server)*/
+            netAdapter.writeFleet(player1Fleet);
+
+            /**Wait for the opponent's fleet. This is blocking*/
+            netAdapter.receiveMessages();
+
+            /**If we received an ACK to our fleet*/
+            if (receivedMessage.getType() == Message.MessageType.FLEET_ACK) {
+
+                /**Our fleet message was ACKED and it was accepted*/
+                if (receivedMessage.getX() == 1) {
+
+                    /**Now we wait to receive the opponent's fleet. This is blocking*/
+                    netAdapter.receiveMessages();
+
+                    /**We received the opponent's fleet as expected*/
+                    if (receivedMessage.getType() == Message.MessageType.FLEET) {
+
+                        //TODO when else to send a rejected (false) FLEET_ACK
+
+                        /**If the fleet message received was not of the right length, reject it*/
+                        if (receivedMessage.getOthers().length != 4 * 5) {
+                            netAdapter.writeFleetAck(false);
+                        }
+
+                        /**If the fleet message was of the right length*/
+                        else {
+
+                            /**Set the opponent's board to be the ones in the leet message*/
+                            setOpponentShips(receivedMessage.getOthers());
+
+
+
+                            /**Send a FLEET_ACK message*/
+                            netAdapter.writeFleetAck(true);
+                        }
+                    }
+
+                    /**We received something OTHER than a FLEET message when we are expecting a FLEET message*/
+                    else {
+                        //TODO what if we didn't receive the opponent's fleet
+                    }
+                }
+
+                /**Our FLEET message was rejected*/
+                else {
+                    //TODO what if the fleet message is rejected
+                }
+            }
+
+            /**We received a message that was not a FLEET_ACK*/
+            else {
+                //TODO what if the next message is not a FLEET_ACK
+            }
+        }
+
+        /**If we are the server then we wait for the opponent's fleet first, ACK it and then send our own and wait for ACK to that.*/
+        else {
+
+        }
+    }
+
+
+    /**
+     * Makes new ships from the fleet message and assigns them to the opponent.
+     *
+     * @param message
+     */
+    private boolean setOpponentShips(int [] message){
+        Ship [] opponentShips = game.opponentShips();
+
+        int index = 0;
+
+        int shipCount = 0;
+        int nextShipSize = -1;
+        int nextShipStartingX = -1;
+        int nextShipStartingY = -1;
+        boolean isHorizontal = false;
+
+        Ship nextShip = null;
+
+        /**Traverse the message*/
+        for(int i : message){
+
+            /**We are looking at the size of a ship*/
+            if(index == 0){
+                /**Reset for next ship*/
+                nextShipStartingX = -1;
+                nextShipStartingY = -1;
+                isHorizontal = false;
+
+                nextShipSize = i;
+
+                /**Make a new ship based on the size*/
+                switch ( nextShipSize ) {
+                    case 5:
+                        nextShip = new Ship(0);
+                        break;
+                    case 4:
+                        nextShip = new Ship(1);
+                        break;
+                    case 3:
+                        nextShip = new Ship(2);
+                        break;
+                    case 2:
+                        nextShip = new Ship(3);
+                        break;
+
+                    default:
+                        System.out.println("NOT A SHIP");
+                        nextShip = null;
+                        return false;
+                }
+
+                /**Replace previous ship with the new ship*/
+                opponentShips[shipCount] = nextShip;
+                shipCount++;
+
+                index = 1;
+            }
+
+            /**We are looking at the starting X of the ship*/
+            else if(index == 1){
+                nextShipStartingX = i;
+                index = 2;
+            }
+
+            /**We are looking at the starting Y of the ship*/
+            else if(index == 2) {
+                nextShipStartingY = i;
+                index = 3;
+            }
+
+            /**We are looking at the direction of a ship*/
+            else if(index == 3){
+
+                if(i == 1) isHorizontal = true;
+
+                Place [] newPlaces = new Place [nextShipSize];
+
+                /**Make new places for the new ship*/
+                for (int j = 0; j < nextShipSize; j++) {
+                    Place newPlace;
+                    if(isHorizontal) {
+                        newPlace = new Place(nextShipStartingX+j, nextShipStartingY);
+                    }
+
+                    else{
+                        newPlace = new Place(nextShipStartingX, nextShipStartingY+j);
+                    }
+                    newPlace.addShip();
+                    newPlaces[j] = newPlace;
+                }
+
+                nextShip.setPlaces(newPlaces);
+                nextShip.setDirection(!isHorizontal);
+
+                index = 0;
+            }
+        }
+
+        return true;
+    }
+
+    /** Convert the given boolean value to an int. */
+    private int toInt(boolean flag) {
+        return flag ? 1: 0;
     }
     @Override
     protected void onStart() {
         super.onStart();
         //overridePendingTransition(R.anim.game_in,R.anim.game_out); //FIXME 3.6-7, 4.6?
     }
-    /** Show a toast message. */
+
+    /**
+     * Show a toast message.
+     */
     protected void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
@@ -67,6 +305,7 @@ public class GameActivity extends AppCompatActivity {
         game.setPlayer1Board(computerDesigned);
         game.setPlayer2Board(userDesigned);
     }
+
     /* Establishes the Players' Boards to their opponents' BoardViews */
     private void setBoards() {
         userBV.setBoard(game.userBoard());
@@ -80,36 +319,40 @@ public class GameActivity extends AppCompatActivity {
 
     /* Show Player played a hit on the Board */
     private void hit(int y, int x) {
-        if ( game.playerTurn() )
-            game.player1Hit(x,y);
+        if (game.playerTurn())
+            game.player1Hit(x, y);
         setBoards();
-        while ( game.computerTurn() ) {
+        while (game.computerTurn()) {
             game.player2Hit();
             setBoards();
         }
         updateShots();
-        if ( hasWinner() )
+        if (hasWinner())
             startNew();
     }
+
     private boolean hasWinner() {
-        if ( game.computerWon() ) {
+        if (game.computerWon()) {
             toast("Computer won!");
             return true;
         } else {
-            if ( game.userWon() ) {
+            if (game.userWon()) {
                 toast("Player won!");
                 return true;
             } else return false;
         }
     }
+
     private void startNew() {
         game.createNewGame();
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
     }
+
     private void continueGame() {
         //TODO idk wut to do here...
     }
+
     private void createDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage(R.string.newGameRequest);
