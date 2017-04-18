@@ -12,6 +12,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +30,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 public class MainActivity extends AppCompatActivity {
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         ai = (Spinner) findViewById(R.id.AIspinner);
         setAISpinner();
         connected = false;
+        client = false;
     }
 
     /** Show a toast message. */
@@ -197,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
         else createTryAgainDialog("Wifi not connected!","Try Again","Cancel");
     }
 
-    private boolean connectPlayers(){
+    private void connectPlayers(){
 
         AsyncTask.execute(new Runnable() {
             @Override
@@ -205,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                 //TODO your background code
                 try{
                     //Connect to the connector socket
-                    Socket connectorSocket = new Socket("192.168.0.142", 8003);
+                    Socket connectorSocket = new Socket("172.19.152.51", 8003);
 
                     //To read from socket
                     BufferedReader in
@@ -226,13 +229,25 @@ public class MainActivity extends AppCompatActivity {
 
                     //This is stating whether This is the client or the server
                     String clientBoolean = in.readLine();
-                    if(clientBoolean.equals("true")) client = true;
 
-                    opponentSocket = new Socket(otherIP, 2027);
+                    ServerSocket opponentServerSocket;
+
+                    //If we are the client then create a socket to the server
+                    if(clientBoolean.equals("true")) {
+                        client = true;
+                        SystemClock.sleep(1000);
+                        opponentSocket = new Socket(otherIP, 2027);
+                    }
+
+                    //If we are the server create a server socket
+                    else{
+                        opponentServerSocket = new ServerSocket(2027);
+                        opponentSocket = opponentServerSocket.accept();
+                    }
+
                     Battleship.getGame().initializeAdapter(opponentSocket);
 
                     connected = true;
-
                 }
                 catch(IOException e){
                     e.printStackTrace();
@@ -240,9 +255,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-        return true;
     }
 
 
