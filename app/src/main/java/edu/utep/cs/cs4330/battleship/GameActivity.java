@@ -46,43 +46,53 @@ public class GameActivity extends AppCompatActivity {
                 switch (type) {
                     case SHOT:
                         receivedMessage = new Message(Message.MessageType.SHOT, x, y, others);
+//                        processShot(receivedMessage);
                         break;
 
                     case SHOT_ACK:
                         receivedMessage = new Message(Message.MessageType.SHOT_ACK, x, y, others);
+//                        processShotACK(receivedMessage);
                         break;
 
                     case GAME:
                         receivedMessage = new Message(Message.MessageType.GAME, x, y, others);
+//                        processGame(receivedMessage);
                         break;
 
                     case GAME_ACK:
                         receivedMessage = new Message(Message.MessageType.GAME_ACK, x, y, others);
+//                        processGameACK(receivedMessage);
                         break;
 
                     case FLEET:
                         Log.d("RECEIVING", "FLEET");
                         receivedMessage = new Message(Message.MessageType.FLEET, x, y, others);
+                        processFleetMessage(receivedMessage);
                         break;
 
                     case FLEET_ACK:
                         receivedMessage = new Message(Message.MessageType.FLEET_ACK, x, y, others);
+                        processFleetACK(receivedMessage);
                         break;
 
                     case TURN:
                         receivedMessage = new Message(Message.MessageType.TURN, x, y, others);
+//                        processTurnMessage(receivedMessage);
                         break;
 
                     case QUIT:
                         receivedMessage = new Message(Message.MessageType.QUIT, x, y, others);
+//                        processQuitMessage(receivedMessage);
                         break;
 
                     case CLOSE:
                         receivedMessage = new Message(Message.MessageType.CLOSE, x, y, others);
+//                        processCloseMessag(receivedMessage);
                         break;
 
                     case UNKNOWN:
                         receivedMessage = new Message(Message.MessageType.UNKNOWN, x, y, others);
+//                        processUnknownMessage(receivedMessage);
                         break;
 
                 }
@@ -103,190 +113,220 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        exchangeFleets();
+
+        //If we are the client then we send the fleet first
+        if(game.isClient()) {
+            netAdapter.writeFleet(game.makeFleetMessage());
+        }
+
+        netAdapter.receiveMessagesAsync();////////////
+
         game.computerBoard().clearBoard();
         game.computerBoard().restoreShips(game.opponentShips());
 
         //===================================
         assignBoards();
         setBoards();
-
         shotsLabel = (TextView) findViewById(R.id.shots);
     }
 
-    class SignInAsyncTask extends AsyncTask<Void, Void, String> {
+    /**
+     *
+     * @param received
+     */
+    private void processFleetMessage(Message received){
 
-        @Override
-        protected void onPreExecute() {
-            gotMessage = false;
+        /**
+         * At this point the boards have been interchanged by
+         * <assignBoards()> and <setBoards> so we are actually
+         * changing the ships in our own board.
+         *
+         * Thanks Michelle for that board logic :)
+        */
+        setOpponentShips(received.others);
+        game.userBoard().clearBoard();
+        game.userBoard().restoreShips(game.opponentShips());
 
-            super.onPreExecute();
-            // Display a progress bar saying signing in or something
+        //Send an ACK for the FLEET we received
+        netAdapter.writeFleetAck(true);
+
+        //If we are the Server
+        if(!game.isClient()){
+            //Send our own FLEET message
+            int [] message = game.makeFleetMessage();
+            netAdapter.writeFleet(message);
         }
 
-        @Override
-        protected String doInBackground(Void... params) {
-            // Call your web service
-            netAdapter.receiveMessagesAsync();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            gotMessage = true;
-            super.onPostExecute(result);
-            // Sign in if the credentials are okay, otherwise show some error message to the user
-        }
+        //TODO when to do false
+        //TODO difference between server and client
     }
-
-    private void exchangeFleets() {
-        int[] player1Fleet = game.makeFleetMessage();
-
-        //If this instance is the client then send his fleet first and wait for a FLEET ACK from the other player through the NetworkAdapter
-        if (game.isClient()) {
-
-            //Send our fleet to our opponent (the server)
-            netAdapter.writeFleet(player1Fleet);
-
-            //If our fleet was successfully ACK
-            if (receiveFleetACK()) {
-
-                //Now that we have successfully sent our FLEET we need to receive opponent's FLEET
-                receiveFleetMsg();
-            }
-
-
-            //If we received a message that was not a FLEET_ACK OR our FLEET msg was rejected by opponent
-            else {
-                //TODO what to do if our FLEET was rejected
-            }
-
-        }
-
-        //If we are the server then we wait for the opponent's fleet first, ACK it and then send our own and wait for ACK to that.
-        else {
-
-            //Since we are the server, we wait for the opponent's fleet first
-            if (receiveFleetMsg()) {
-
-                //Send an FLEET_ACK to the opponent's FLEET message
-                netAdapter.writeFleetAck(true);
-
-                //Send our fleet to the opponent
-                netAdapter.writeFleet(player1Fleet);
-            }
-
-            //We didn't receive a FLEET message
-            else {
-                //TODO what do when we don't receive a FLEET message
-                //TODO reject FLEET message with false FLEET_ACK or send error (UNKNOWN message)?
-                netAdapter.writeFleetAck(false);
-            }
-        }
-    }
-
-    public void receiveMessage(){
-        SignInAsyncTask receiver = new SignInAsyncTask();
-        receiver.execute();
-        while(true){
-            if(gotMessage == true) break;
-            else{
-                Log.d("RECEIVING", "FLEET");
-            }
-        }
-    }
-
 
     /**
-     * Method that receives message from the NetworkAdapter expecting a FLEET_ACK message
      *
-     * @return
+     * @param receivedMessage
      */
-    private boolean receiveFleetACK() {
+    private void processFleetACK(Message receivedMessage){
+        //If we are the client
+        if(game.isClient()){
 
-        //Wait for the opponent's FLEET_ACK to our FLEET message.
-        receiveMessage();
-
-        while(true){
-            if(gotMessage) break;
         }
 
-        //If we received an ACK to our fleet
-        if (receivedMessage.getType() == Message.MessageType.FLEET_ACK) {
-            gotMessage = false;
-            //Our fleet message was ACKED and it was accepted
-            if (receivedMessage.getX() == 1) {
-                return true;
-            }
-
-            //Our FLEET message was rejected
-            else {
-                return false;
-                //TODO what if the fleet message is rejected
-            }
-        }
-
-        //We received a message that was not a FLEET_ACK
+        //If we are the server
+        //Server is always the last to receive a FLEET_ACK so we move on to starting the game from here
         else{
-            gotMessage = false;
-            return false;
-            //TODO what if the next message is not a FLEET_ACK
-        }
+//
+//            assignBoards();
+//            setBoards();
 
-    }
-
-    /**
-     * Calls NetAdapter to receive message expecting a FLEET message
-     *
-     * @return true - if the message received was a FLEET message
-     * false - if the message received was NOT a FLEET message
-     * or does not contain the correct length.
-     */
-    private boolean receiveFleetMsg() {
-
-        receiveMessage();
-
-        while(true){
-            if(gotMessage) break;
-            else{
-                System.out.println("Waiting");
-                System.out.println("WAIIIIT");
-            }
-
-            System.out.println("Tired of WAITING");
-        }
-
-        //We received the opponent's fleet as expected
-        if (receivedMessage.getType() == Message.MessageType.FLEET) {
-            gotMessage = false;
-            //TODO when else to send a rejected (false) FLEET_ACK
-
-            //If the fleet message received was not of the right length, reject it
-            if (receivedMessage.getOthers().length != 4 * 5) {
-                netAdapter.writeFleetAck(false);
-                return false;
-            }
-
-            //If the fleet message was of the right length
-            else {
-
-                //Set the opponent's board to be the ones in the leet message
-                setOpponentShips(receivedMessage.getOthers());
-
-                //Send a FLEET_ACK message
-                netAdapter.writeFleetAck(true);
-            }
-
-            return true;
-        }
-
-        //We received something OTHER than a FLEET message when we are expecting a FLEET message
-        else {
-            gotMessage = false;
-            //TODO what if we didn't receive the opponent's fleet
-            return false;
+            //Tell the opponent who has the first turn.
+            netAdapter.writeTurn(true);
         }
     }
+
+//    private void exchangeFleets() {
+//        int[] player1Fleet = game.makeFleetMessage();
+//
+//        //If this instance is the client then send his fleet first and wait for a FLEET ACK from the other player through the NetworkAdapter
+//        if (game.isClient()) {
+//
+//            //Send our fleet to our opponent (the server)
+//            netAdapter.writeFleet(player1Fleet);
+//
+//            //If our fleet was successfully ACK
+//            if (receiveFleetACK()) {
+//
+//                //Now that we have successfully sent our FLEET we need to receive opponent's FLEET
+//                receiveFleetMsg();
+//            }
+//
+//
+//            //If we received a message that was not a FLEET_ACK OR our FLEET msg was rejected by opponent
+//            else {
+//                //TODO what to do if our FLEET was rejected
+//            }
+//
+//        }
+//
+//        //If we are the server then we wait for the opponent's fleet first, ACK it and then send our own and wait for ACK to that.
+//        else {
+//
+//            //Since we are the server, we wait for the opponent's fleet first
+//            if (receiveFleetMsg()) {
+//
+//                //Send an FLEET_ACK to the opponent's FLEET message
+//                netAdapter.writeFleetAck(true);
+//
+//                //Send our fleet to the opponent
+//                netAdapter.writeFleet(player1Fleet);
+//            }
+//
+//            //We didn't receive a FLEET message
+//            else {
+//                //TODO what do when we don't receive a FLEET message
+//                //TODO reject FLEET message with false FLEET_ACK or send error (UNKNOWN message)?
+//                netAdapter.writeFleetAck(false);
+//            }
+//        }
+//    }
+
+//    public void receiveMessage(){
+//        SignInAsyncTask receiver = new SignInAsyncTask();
+//        receiver.execute();
+//        while(true){
+//            if(gotMessage == true) break;
+//            else{
+//                Log.d("RECEIVING", "FLEET");
+//            }
+//        }
+//    }
+
+
+//    /**
+//     * Method that receives message from the NetworkAdapter expecting a FLEET_ACK message
+//     *
+//     * @return
+//     */
+//    private boolean receiveFleetACK() {
+//
+//        //Wait for the opponent's FLEET_ACK to our FLEET message.
+//        receiveMessage();
+//
+//        while(true){
+//            if(gotMessage) break;
+//        }
+//
+//        //If we received an ACK to our fleet
+//        if (receivedMessage.getType() == Message.MessageType.FLEET_ACK) {
+//            //Our fleet message was ACKED and it was accepted
+//            if (receivedMessage.getX() == 1) {
+//                return true;
+//            }
+//
+//            //Our FLEET message was rejected
+//            else {
+//                return false;
+//                //TODO what if the fleet message is rejected
+//            }
+//        }
+//
+//        //We received a message that was not a FLEET_ACK
+//        else{
+//            return false;
+//            //TODO what if the next message is not a FLEET_ACK
+//        }
+//
+//    }
+//
+//    /**
+//     * Calls NetAdapter to receive message expecting a FLEET message
+//     *
+//     * @return true - if the message received was a FLEET message
+//     * false - if the message received was NOT a FLEET message
+//     * or does not contain the correct length.
+//     */
+//    private boolean receiveFleetMsg() {
+//
+//        receiveMessage();
+//
+//        while(true){
+//            if(gotMessage) break;
+//            else{
+//                System.out.println("Waiting");
+//                System.out.println("WAIIIIT");
+//            }
+//
+//            System.out.println("Tired of WAITING");
+//        }
+//
+//        //We received the opponent's fleet as expected
+//        if (receivedMessage.getType() == Message.MessageType.FLEET) {
+//            //TODO when else to send a rejected (false) FLEET_ACK
+//
+//            //If the fleet message received was not of the right length, reject it
+//            if (receivedMessage.getOthers().length != 4 * 5) {
+//                netAdapter.writeFleetAck(false);
+//                return false;
+//            }
+//
+//            //If the fleet message was of the right length
+//            else {
+//
+//                //Set the opponent's board to be the ones in the leet message
+//                setOpponentShips(receivedMessage.getOthers());
+//
+//                //Send a FLEET_ACK message
+//                netAdapter.writeFleetAck(true);
+//            }
+//
+//            return true;
+//        }
+//
+//        //We received something OTHER than a FLEET message when we are expecting a FLEET message
+//        else {
+//            //TODO what if we didn't receive the opponent's fleet
+//            return false;
+//        }
+//    }
 
     /**
      * Makes new ships from the fleet message and assigns them to the opponent.
