@@ -11,7 +11,10 @@
 package edu.utep.cs.cs4330.battleship;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -49,6 +52,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
     private Battleship game;
@@ -61,7 +65,21 @@ public class MainActivity extends AppCompatActivity {
     //WifiDirect functionality
     WifiP2pManager manager;
     WifiP2pManager.Channel channel;
-    BroadcastReceiver receiver;
+    WifiBroadcastReceiver bdReceiver;
+    //Bluetooth functionality
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
+            if ( BluetoothDevice.ACTION_FOUND.equals(i.getAction()) ) { //found a BT device
+                BluetoothDevice device = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                String remoteAddr = device.getAddress(); // MAC address
+                Log.d("MAINACT-BT","connecting to " +remoteAddr);
+                if ( connect(remoteAddr) )
+                    BluetoothAdapter.getDefaultAdapter().cancelDiscovery(); //stop searching
+                else
+                    Log.d("MAINACT-BT","couldn't connect");
+            }
+        }
+    };
     IntentFilter intentFilter;
 
     @Override
@@ -79,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
         setAISpinner();
         connected = false;
         client = false;
+
+        setupBT();
     }
     /* Register the broadcast receiver with the intent values to be matched */
     @Override
@@ -92,7 +112,11 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         unregisterReceiver(receiver);
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+    }
     /** Show a toast message. */
     protected void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
@@ -155,32 +179,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* Bluetooth Functionality */
-    private boolean BTenabled() {
-        //checks if BT is on
+    private void setupBT() {
+        //Register for broadcasts when a device is discovered
+        intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(receiver, intentFilter);
+    }
+    private boolean connect(String addr) {
+        //connect to this device for game play
+        NetworkAdapter ntAdapter = null;
+        BluetoothSocket bS;
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if ( btAdapter!=null && btAdapter.isEnabled() )
-            return true;
-        return false;
+        do {
+            Log.d("MAINACT","turning on bluetooth");
+            startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+        } while ( btAdapter.getState()!=btAdapter.STATE_TURNING_ON );
+        //turning on discoverable state for 180 seconds (3 minutes)
+        while ( !btAdapter.startDiscovery() ) ;
+        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 180);
+        startActivity(discoverableIntent);
+        //listen for clients specific to this application's services
+        String name = "bs20226";
+        java.util.UUID uuid = UUID.randomUUID();
+        try {
+            BluetoothServerSocket bSS = btAdapter.listenUsingRfcommWithServiceRecord(name, uuid);
+            do {
+                Log.d("MAINACT","accepting connections...");
+                bS = bSS.accept();
+            } while ( bS!=null );
+            bS.close();
+            ntAdapter = new NetworkAdapter(bS);
+        } catch ( java.io.IOException e ) { ; }
+        if ( ntAdapter==null ) return false;
+        return true;
     }
-
-    private void turnOnBT() {
-        //creates a window alert: user permission to turn on BT
-        Intent intent = new Intent(BluetoothAdapter.getDefaultAdapter().ACTION_REQUEST_ENABLE);
-        startActivity(intent);
-    }
-
     private void startBTGame() {
-        //activity (settings): connects to bluetooth
-        startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
-        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if ( !true ) //todo device not connected to another phone
-            createTryAgainDialog("Bluetooth not connected!","Try Again","Cancel");
-        //String remote = btAdapter.getAddress(); // format 00:00:00:00:00:00
-        //UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-        //BluetoothServerSocket btSS = btAdapter.listenUsingRfcommWithServiceRecord(remote,uuid);
-        //BluetoothDevice btDevice = btAdapter.getRemoteDevice(remote);
-        //BluetoothSocket btS = btDevice.createRfcommSocketToServiceRecord(SERIAL_UUID);
-        //btS.connect();
+        //activity (settings): turn on bluetooth
+
     }
 
     /* Wifi Functionality */
@@ -240,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
                 //TODO your background code
                 try{
                     //Connect to the connector socket
-                    Socket connectorSocket = new Socket("172.19.152.51", 8003);
+                    Socket connectorSocket = new Socket("172.19.152.137", 8003);
 
                     //To read from socket
                     BufferedReader in
@@ -294,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
         //register Battleship with WifiP2p framework
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
-        receiver = new WifiBroadcastReceiver(manager, channel, this);
+        bdReceiver = new WifiBroadcastReceiver(manager, channel, this);
         intentFilter = new IntentFilter();
         //intent filter of intents the broadcast receiver checks for
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -349,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
     public void connectPlayer(View view){
         switch ( conectionType ) {
             case 0: //Bluetooth
-                startBTGame();
+                //todo umm idk
                 break;
             case 1: //Wifi Direct
                 startWFDirectGame();
