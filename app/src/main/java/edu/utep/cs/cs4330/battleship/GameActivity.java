@@ -61,6 +61,7 @@ public class GameActivity extends AppCompatActivity {
                         break;
 
                     case FLEET:
+                        Log.d("RECEIVING", "FLEET");
                         receivedMessage = new Message(Message.MessageType.FLEET, x, y, others);
                         break;
 
@@ -187,7 +188,14 @@ public class GameActivity extends AppCompatActivity {
     public void receiveMessage(){
         SignInAsyncTask receiver = new SignInAsyncTask();
         receiver.execute();
+        while(true){
+            if(gotMessage == true) break;
+            else{
+                Log.d("RECEIVING", "FLEET");
+            }
+        }
     }
+
 
     /**
      * Method that receives message from the NetworkAdapter expecting a FLEET_ACK message
