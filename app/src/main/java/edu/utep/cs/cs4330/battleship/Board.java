@@ -185,17 +185,69 @@ public class Board { //implements Serializable {
         int x = s.inPlaces()[0].getX();
         int y = s.inPlaces()[0].getY();
         board[x][y] = board[x][y].removeShip(); //for checking to place
-        if ( s.isVertical() && canPlace(s,x,y) ) {
-        	//System.out.println("should be gucci vert");
-            return true;
-        } else if ( !s.isVertical() && canPlace(s,x,y) ) {
-        	//System.out.println("should be gucci hori");
-            return true;
+        if (s.isVertical() ) {
+                if(canRotateToHorizontal(s,x,y) ) {
+                    //System.out.println("should be gucci vert");
+                    return true;
+                }
+        } else if (!s.isVertical()){
+            boolean kek = canRotateToVertical(s,x,y);
+            if(kek == true) {
+                //System.out.println("should be gucci hori");
+                return true;
+            }
         }
         board[x][y] = board[x][y].addShip();
         return false;
     }
-    
+
+    /**
+     * Returns true if it is possible to rotate the ship.
+     * @param s
+     * @param x
+     * @param y
+     * @return
+     */
+    public boolean canRotateToVertical(Ship s, int x, int y){
+
+        int lastVerticalLocation = x + s.getSize()-1;
+        int lastHorizontalLocation = y;
+
+        if(lastVerticalLocation >= size){
+            return false;
+        }
+
+        /**Check that there aren't any ships in the way*/
+        for(int i = x; i <= lastVerticalLocation; i++){
+            /**Return false if there is a ship in the way*/
+            if(at(i,y).hasShip()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean canRotateToHorizontal(Ship s, int x, int y){
+
+        int lastVerticalLocation = x;
+        int lastHorizontalLocation = y + s.getSize()-1;
+
+        if(lastHorizontalLocation >= size){
+            return false;
+        }
+
+        /**Check that there aren't any ships in the way*/
+        for(int i = y; i <= lastHorizontalLocation; i++){
+            /**Return false if there is a ship in the way*/
+            if(at(x,i).hasShip()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /* Replaces the Ships in the Board after erasing the Board */
     public void restoreShips(Ship[] s) {
     	for ( int i=0 ; i<s.length ; i++ )

@@ -133,6 +133,8 @@ public class HumanDeployActivity extends AppCompatActivity{
 
     private boolean moveShip(int rowAmount, int colAmount){
         Place [] placesARRAY = currentShip.inPlaces();
+        Place [] newPlaces = new Place[currentShip.inPlaces().length];
+
         int row;
         int col;
         int index = 0;
@@ -153,11 +155,11 @@ public class HumanDeployActivity extends AppCompatActivity{
 
             Place newPlace = new Place(row+rowAmount, col+colAmount);
             newPlace.addShip();
-            placesARRAY[index] = newPlace;
+            newPlaces[index] = newPlace;
             index++;
         }
 
-        currentShip.setPlaces(placesARRAY);
+        currentShip.setPlaces(newPlaces);
         humanBoard.clearBoard();
         humanBoard.restoreShips(game.userShips());
         setBoard();
@@ -199,7 +201,9 @@ public class HumanDeployActivity extends AppCompatActivity{
      * @return true if the ship was able to rotate successfully, false otherwise
      */
     private void rotate(Ship rotatingShip){
-        rotatingShip.rotate();
+        if(humanBoard.canRotate(rotatingShip)) {
+            rotatingShip.rotate();
+        }
         game.userBoard().clearBoard();
         game.userBoard().restoreShips(game.userShips());
     }

@@ -8,11 +8,19 @@
 
 package edu.utep.cs.cs4330.battleship;
 
+import java.net.Socket;
+
 public class Battleship {
     /* The Players in the Game */
     private Player player1;
     private Player player2;
     private static Battleship instance = new Battleship(10,5);
+
+    private NetworkAdapter playerConnection;
+
+
+
+    private boolean isClient;
 
     private Battleship(int b, int s) {
         initPlayers(b,s);
@@ -23,6 +31,89 @@ public class Battleship {
             instance = new Battleship(10,5);
         return instance;
     }
+
+    /**
+     * Set whether the current user is the client or the server
+     * @param client
+     */
+    public void setIsClient(boolean client){
+        isClient = client;
+    }
+
+    /**
+     * Get whether the current user is the client or the server
+     * @return isClient
+     */
+    public boolean isClient() {
+        return isClient;
+    }
+
+    /**
+     * Creates a NetworkAdapter based on a TCP socket
+     * @param wifiSocket
+     */
+    public void initializeAdapter(Socket wifiSocket){
+        playerConnection = new NetworkAdapter(wifiSocket);
+    }
+
+    /**
+     * Creates a fleet message encoded for the NetworkAdapter
+     *
+     * @return int array containing encoded message of the player's ships
+     */
+    public int [] makeFleetMessage(){
+        //Create new fleet message (4 things per ship, 5 ships)
+        int [] fleetMessage = new int [4*5];
+
+        int index = 0;
+
+        /**Traverse all the ships*/
+        for(Ship currentShip : Battleship.getGame().userShips()){
+
+            //4 entries per ship
+            for(int i = 0; i < 4; i++){
+                switch(i){
+                    //Adding the size of the current ship
+                    case 0:
+                        fleetMessage[index] = currentShip.getSize();
+                        break;
+
+                    //Adding the starting x position
+                    case 1:
+                        fleetMessage[index] = currentShip.inPlaces()[0].getX();
+                        break;
+
+
+                    //Adding the starting y postition
+                    case 2:
+                        fleetMessage[index] = currentShip.inPlaces()[0].getY();
+                        break;
+
+                    //Adding the direction of the current ship
+                    case 3:
+                        if(currentShip.isVertical())
+                            fleetMessage[index] = 0;
+
+                        else
+                            fleetMessage[index] = 1;
+
+                        break;
+                }
+                index++;
+            }
+        }
+
+        return fleetMessage;
+    }
+
+    /**
+     * Return the NetworkAdapter
+     * @return
+     */
+    public NetworkAdapter getPlayerConnection() {
+        return playerConnection;
+    }
+
 
     private void initPlayers(int b, int s) {
         /* Create the Players for the Battleship Game */
@@ -117,6 +208,10 @@ public class Battleship {
 
     public Ship[] userShips() {
     	return player1.getShips();
+    }
+
+    public Ship[] opponentShips() {
+        return player2.getShips();
     }
 
     /* If the user Player hit a Ship, they can keep hitting */

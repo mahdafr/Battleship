@@ -407,7 +407,11 @@ public class NetworkAdapter {
             parseFleetAckMessage(msgBody(msg));
         } else if (msg.startsWith(MessageType.FLEET.header)) {
             parseFleetMessage(msgBody(msg));
+<<<<<<< HEAD
         } else if (msg.startsWith(MessageType.TURN.header)) {
+=======
+        } else if (msg.startsWith(MessageType.TURN.header)) { ///MADE IT ELSE IF
+>>>>>>> WifiFunctionality
             parseTurnMessage(msgBody(msg));
         } else if (msg.startsWith(MessageType.QUIT.header)) {
             notifyMessage(MessageType.QUIT);

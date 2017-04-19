@@ -50,6 +50,7 @@ public class Player {
         }
     }
 
+
     private void initBoard(int b) {
         /* Create the Board for the Battleship Game */
         board = new Board(b);
