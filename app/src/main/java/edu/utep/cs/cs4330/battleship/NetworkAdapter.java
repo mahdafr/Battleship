@@ -407,7 +407,7 @@ public class NetworkAdapter {
             parseFleetAckMessage(msgBody(msg));
         } else if (msg.startsWith(MessageType.FLEET.header)) {
             parseFleetMessage(msgBody(msg));
-        } if (msg.startsWith(MessageType.TURN.header)) {
+        } else if (msg.startsWith(MessageType.TURN.header)) {
             parseTurnMessage(msgBody(msg));
         } else if (msg.startsWith(MessageType.QUIT.header)) {
             notifyMessage(MessageType.QUIT);
