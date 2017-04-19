@@ -22,20 +22,32 @@
         android:layout_marginTop="125dp"
         android:orientation="vertical">
 
+<<<<<<< HEAD
         <!--
         <Button
+=======
+        <!--<Button
+>>>>>>> misha
             android:text="@string/local"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/local"
+<<<<<<< HEAD
             android:onClick="LOCALclicked"/> -->
+=======
+            android:onClick="LOCALclicked"/>-->
+>>>>>>> misha
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Choose P2P connection"
+<<<<<<< HEAD
             android:layout_marginTop="50dp"
             />
+=======
+            android:layout_marginTop="50dp"/>
+>>>>>>> misha
 
         <Spinner
             android:id="@+id/P2Pspinner"
@@ -53,8 +65,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Choose AI Difficulty"
+<<<<<<< HEAD
             android:layout_marginTop="50dp"
             />
+=======
+            android:layout_marginTop="50dp"/>
+
+>>>>>>> misha
         <Spinner
             android:id="@+id/AIspinner"
             android:layout_width="wrap_content"
