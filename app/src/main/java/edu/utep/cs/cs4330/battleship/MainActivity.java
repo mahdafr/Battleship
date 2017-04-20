@@ -12,28 +12,18 @@ package edu.utep.cs.cs4330.battleship;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -49,7 +39,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.UUID;
@@ -67,19 +56,7 @@ public class MainActivity extends AppCompatActivity {
     WifiP2pManager.Channel channel;
     WifiBroadcastReceiver bdReceiver;
     //Bluetooth functionality
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        public void onReceive(Context c, Intent i) {
-            if ( BluetoothDevice.ACTION_FOUND.equals(i.getAction()) ) { //found a BT device
-                BluetoothDevice device = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String remoteAddr = device.getAddress(); // MAC address
-                Log.d("MAINACT-BT","connecting to " +remoteAddr);
-                if ( connect(remoteAddr) )
-                    BluetoothAdapter.getDefaultAdapter().cancelDiscovery(); //stop searching
-                else
-                    Log.d("MAINACT-BT","couldn't connect");
-            }
-        }
-    };
+    //private BroadcastReceiver receiver;
     IntentFilter intentFilter;
 
     @Override
@@ -97,25 +74,23 @@ public class MainActivity extends AppCompatActivity {
         setAISpinner();
         connected = false;
         client = false;
-
-        setupBT();
     }
     /* Register the broadcast receiver with the intent values to be matched */
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(receiver, intentFilter);
+        registerReceiver(btReceiver, intentFilter);
     }
     /* De-register the broadcast receiver */
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(receiver);
+        unregisterReceiver(btReceiver);
     }
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(receiver);
+        unregisterReceiver(btReceiver);
     }
     /** Show a toast message. */
     protected void toast(String msg) {
@@ -179,43 +154,98 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* Bluetooth Functionality */
+    private final BroadcastReceiver btReceiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
+            if ( BluetoothDevice.ACTION_FOUND.equals(i.getAction()) ) {
+                //try to connect to each device found
+                remote = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                String name = remote.getName();
+                String remoteAddr = remote.getAddress(); // MAC address
+                Log.d("MAINACT-BT","found device " +name);
+            }
+        }
+    };
+    BluetoothDevice remote;
     private void setupBT() {
         //Register for broadcasts when a device is discovered
         intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(receiver, intentFilter);
+        registerReceiver(btReceiver, intentFilter);
     }
-    private boolean connect(String addr) {
-        //connect to this device for game play
-        NetworkAdapter ntAdapter = null;
-        BluetoothSocket bS;
+    private boolean turnOnBT() {
+        //turns on BT through this app
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        do {
-            Log.d("MAINACT","turning on bluetooth");
-            startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
-        } while ( btAdapter.getState()!=btAdapter.STATE_TURNING_ON );
-        //turning on discoverable state for 180 seconds (3 minutes)
-        while ( !btAdapter.startDiscovery() ) ;
+        Log.d("MAINACT-BT","BT functionality: " +(btAdapter!=null));
+        Log.d("MAINACT-BT","launching intent to enable BT");
+        if ( btAdapter.isEnabled() ) return true;
+        startActivityForResult(new Intent(btAdapter.ACTION_REQUEST_ENABLE),1);
+        while ( btAdapter.getState()<btAdapter.STATE_ON ) ;
+        return true;
+    }
+    private void makeDiscoverable() {
+        //makes the local device discoverable by bluetooth for 3 minutes (180 sec) (if user ok)
+        Log.d("MAINACT-BT","launching intent to enable discovery BT");
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 180);
         startActivity(discoverableIntent);
-        //listen for clients specific to this application's services
-        String name = "bs20226";
-        java.util.UUID uuid = UUID.randomUUID();
-        try {
-            BluetoothServerSocket bSS = btAdapter.listenUsingRfcommWithServiceRecord(name, uuid);
-            do {
-                Log.d("MAINACT","accepting connections...");
-                bS = bSS.accept();
-            } while ( bS!=null );
-            bS.close();
-            ntAdapter = new NetworkAdapter(bS);
-        } catch ( java.io.IOException e ) { ; }
-        if ( ntAdapter==null ) return false;
-        return true;
     }
     private void startBTGame() {
-        //activity (settings): turn on bluetooth
+        setupBT();
+        turnOnBT();
+        makeDiscoverable();
+        AcceptThread connectBT = new AcceptThread();
+        connectBT.run();/*
+        String localAddress = BluetoothAdapter.getDefaultAdapter().getAddress();
+        String remoteAddress = remote.getAddress();
+        Log.d("MAINACT-BT","connected to " +remoteAddress);*/
+    }
+    private class AcceptThread extends Thread {
+        private final BluetoothServerSocket bSS;
 
+        /* Listen for clients specific to this application's services */
+        public AcceptThread() {
+            BluetoothServerSocket tmp = null;
+            String name = "bs20226";
+            java.util.UUID uuid = UUID.randomUUID();
+            try {
+                Log.d("MAINACT-BT","creating server socket");
+                tmp = BluetoothAdapter.getDefaultAdapter().listenUsingRfcommWithServiceRecord(name, uuid);
+            } catch ( java.io.IOException e ) {
+                Log.d("MAINACT-BT", "Socket's listen() method failed", e);
+            }
+            bSS = tmp;
+            Log.d("MAINACT-BT","created server socket");
+        }
+
+        public void run() {
+            BluetoothSocket bS = null;
+            //Keep listening until exception occurs or a socket is returned.
+            while (true) {
+                try {
+                    Log.d("MAINACT-BT","creating socket");
+                    bS = bSS.accept();
+                } catch ( java.io.IOException e ) {
+                    Log.d("MAINACT-BT", "Socket's accept() method failed", e);
+                    break;
+                }
+                if ( bS!=null ) {
+                    // connection accepted: do work associated w/connection in separate thread
+                    //manageMyConnectedSocket(bS);
+                    try {
+                        bSS.close();
+                    } catch ( java.io.IOException e ) { ; }
+                    break;
+                }
+            }
+        }
+
+        /* Closes the connect socket and causes the thread to finish */
+        public void cancel() {
+            try {
+                bSS.close();
+            } catch (IOException e) {
+                Log.e("MAINACT-BT", "Could not close the connect socket", e);
+            }
+        }
     }
 
     /* Wifi Functionality */
@@ -381,10 +411,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void connectPlayer(View view){
+    public void pairPlayer(View view){
         switch ( conectionType ) {
             case 0: //Bluetooth
-                //todo umm idk
+                startBTGame();
                 break;
             case 1: //Wifi Direct
                 startWFDirectGame();

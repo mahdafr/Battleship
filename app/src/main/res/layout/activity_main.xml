@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Pair with other player"
-            android:onClick="connectPlayer"/>
+            android:onClick="pairPlayer"/>
 
         <TextView
             android:layout_width="wrap_content"
